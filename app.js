@@ -141,4 +141,4 @@ $("#btnPrintPDF").onclick=printPDF;
 $("#btnBackEditor").onclick=()=>show("editor");
 $$("[data-clear]").forEach(b=>b.onclick=()=>clearCanvas($("#"+b.dataset.clear)));
 buildChecklist();setupSig($("#sigEjecuta"));setupSig($("#sigRecibe"));initHome();
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{}));
