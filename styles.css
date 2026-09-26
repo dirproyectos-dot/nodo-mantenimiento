@@ -1,0 +1,2192 @@
+:root{--blue:#123c7a;--blue2:#1f5aa6;--line:#cbd5e1;--bg:#f4f7fb;--text:#172033}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border-bottom:1px solid var(--line)}
+.logo{width:46px;height:46px;object-fit:contain}.topbar div{flex:1}.topbar small{display:block;color:#64748b;margin-top:3px}
+main{max-width:1100px;margin:auto;padding:16px}.view{display:none}.view.active{display:block}
+.hero{padding:12px 4px}.hero h1{margin:0 0 6px;color:var(--blue)}.hero p{margin:0;color:#64748b}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0;box-shadow:0 2px 8px #0000000b}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{display:flex;flex-direction:column;gap:5px;font-weight:600;font-size:13px}
+input,textarea,select{width:100%;padding:11px;border:1px solid #aeb8c7;border-radius:8px;font:inherit;background:#fff}textarea{resize:vertical}
+button,.buttonlike{border:1px solid #9ba8ba;background:#fff;border-radius:9px;padding:11px 14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}button.ghost{padding:8px 11px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}.note{font-size:12px;color:#64748b}
+.report-head{display:grid;grid-template-columns:1fr auto;gap:15px;align-items:center}.report-head h2{font-size:17px;margin:6px 0;color:var(--blue)}
+.meta{display:grid;gap:4px;font-size:12px}.meta span{display:flex;justify-content:space-between;gap:15px;border-bottom:1px solid var(--line);padding:3px}
+.section-title{margin-top:16px;background:var(--blue);color:#fff;font-weight:700;padding:9px 12px;border-radius:8px 8px 0 0}
+.check-row{display:grid;grid-template-columns:65px minmax(220px,1fr) 130px minmax(180px,1fr);gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-top:0;padding:8px}
+.check-row.group{background:#eaf0f8;font-weight:700}.check-row input,.check-row select{padding:8px}.check-row .item{font-weight:700}
+.measurements{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.measurements fieldset{border:1px solid var(--line);border-radius:9px}.measurements label{margin:7px 0}
+.signatures{display:grid;grid-template-columns:1fr 1fr;gap:18px}.sig{width:100%;height:145px;border:1px dashed #64748b;border-radius:8px;background:#fff;touch-action:none;margin:10px 0}
+.sticky-actions{position:relative;background:#fff;padding:12px;border:1px solid var(--line);display:flex;gap:8px;justify-content:center;border-radius:12px;margin:18px 0 28px}
+.history-item{display:grid;grid-template-columns:90px 1fr auto;gap:12px;align-items:center}.history-item .num{font-size:22px;font-weight:800;color:var(--blue)}.history-item small{color:#64748b}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#172033;color:#fff;padding:10px 16px;border-radius:20px;opacity:0;pointer-events:none;transition:.2s;z-index:99}#toast.show{opacity:1}
+.print-report{background:#fff;color:#000}.print-sheet{width:210mm;min-height:297mm;margin:0 auto;background:#fff;padding:8mm;font-size:9.5pt}.phead{display:grid;grid-template-columns:24mm 1fr 42mm;border:1px solid #000}.phead>*{padding:5px;border-right:1px solid #000}.phead>*:last-child{border:0}.phead img{width:20mm}.ptitle{text-align:center;font-weight:700}.pmeta div{display:flex;justify-content:space-between;border-bottom:1px solid #bbb;padding:2px}
+.ptable{width:100%;border-collapse:collapse}.ptable th,.ptable td{border:1px solid #000;padding:3px;vertical-align:top}.psection{background:#d9e5f5;font-weight:700}.psig{width:100%;height:24mm;object-fit:contain}.ptext{min-height:28mm;white-space:pre-wrap}
+@media(max-width:720px){main{padding:10px 10px 28px}.grid2,.signatures,.measurements,.report-head{grid-template-columns:1fr}.check-row{grid-template-columns:48px 1fr}.check-row select,.check-row .obs{grid-column:2}.topbar strong{font-size:12px}.topbar small{font-size:10px}.sticky-actions{flex-wrap:wrap}.history-item{grid-template-columns:70px 1fr}.history-item .hactions{grid-column:1/-1}}
+
+
+.preview-actions{display:flex;gap:10px;justify-content:center;position:sticky;top:72px;z-index:15;background:#f4f7fb;padding:10px;margin-bottom:10px;border:1px solid var(--line);border-radius:10px}
+#printContent{overflow:auto}
+@media(max-width:720px){.preview-actions{position:relative;top:auto;flex-wrap:wrap}.print-sheet{width:100%;min-height:auto;padding:10px;font-size:8.5pt}}
+
+
+/* V1.3 - PDF/A4 optimization */
+#printContent .print-sheet{width:190mm;min-height:0;padding:3mm;font-size:7.2pt;line-height:1.08}
+#printContent .phead{grid-template-columns:22mm 1fr 43mm}
+#printContent .phead>*{padding:2px}
+#printContent .phead img{width:18mm;max-height:15mm;object-fit:contain}
+#printContent .ptitle{font-size:7.4pt;line-height:1.15}
+#printContent .pmeta{font-size:6.6pt}
+#printContent .pmeta div{padding:1px}
+#printContent .ptable{table-layout:fixed}
+#printContent .ptable th,#printContent .ptable td{padding:1.2px 2px;line-height:1.08}
+#printContent .psection{font-size:7pt}
+#printContent .ptext{min-height:14mm;max-height:24mm;overflow:hidden}
+#printContent .psig{display:block;width:100%;height:16mm;object-fit:contain;object-position:center;background:#fff}
+#printContent tr{break-inside:avoid;page-break-inside:avoid}
+
+
+/* V1.4 corporate interface */
+.corp-hero{display:grid;grid-template-columns:260px 1fr;align-items:center;min-height:125px;background:linear-gradient(120deg,#f8fbff 0 28%,#0b3d6e 28% 100%);border-radius:12px;overflow:hidden;border:1px solid #cbd5e1;margin:8px 0 14px}
+.corp-logo{padding:16px 25px}.corp-logo img{max-width:210px;max-height:90px;object-fit:contain}
+.corp-title{text-align:center;color:#fff;padding:18px}.corp-title h1{font-size:29px;margin:0 0 8px;letter-spacing:.5px}.corp-title p{font-size:21px;margin:0;letter-spacing:1px;border-bottom:4px solid #ff7518;padding-bottom:8px}
+.corp-section-head{display:grid;grid-template-columns:68px 1fr auto;align-items:center;background:#0b3d6e;color:#fff;border-radius:10px 10px 0 0;overflow:hidden}
+.corp-section-head>span{background:#ff7518;font-size:28px;font-weight:800;text-align:center;padding:12px}.corp-section-head strong{font-size:19px;padding:0 14px}.corp-section-head small{padding:0 18px}
+.corp-panel{display:grid;grid-template-columns:2fr 1fr;gap:18px;background:#fff;border:1px solid #cbd5e1;border-top:0;border-radius:0 0 12px 12px;padding:18px}
+.corp-fields{display:grid;gap:8px}.corp-fields label{display:grid;grid-template-columns:43% 57%;align-items:center;gap:0}.corp-fields label>span{height:46px;display:flex;align-items:center;background:#e5f1fb;border:1px solid #b8cee2;border-radius:7px 0 0 7px;padding:0 15px;color:#0b3d6e;font-weight:800;font-size:14px}.corp-fields input{height:46px;border-radius:0 7px 7px 0;background:#fffdf4}
+.corp-side{border-left:1px solid #d7e0ea;padding-left:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}.corp-side-logo{width:80%;max-height:135px;object-fit:contain}.corp-side-btn{width:85%;min-height:45px;color:#0b3d6e;background:#edf6fd;border-color:#aac3db}.corp-side-btn.import{cursor:pointer}
+.corp-create{width:100%;margin:12px 0 4px;padding:18px;background:linear-gradient(90deg,#ff6d00,#ff861f);color:#fff;border:0;font-size:23px;letter-spacing:.5px}.corp-create span{font-size:30px;margin-right:14px}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.photo-card h3{text-align:center;color:#0b3d6e;margin:3px}.photo-frame{height:180px;border:2px dashed #9bb0c5;border-radius:10px;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#64748b}.photo-frame img{width:100%;height:100%;object-fit:cover;display:none}.photo-button{margin:8px 0;padding:10px;background:#0b3d6e;color:#fff;border-radius:8px;cursor:pointer;text-align:center}
+.photo-print-title{text-align:center;font-weight:700;margin-bottom:2px}.photo-print-box{height:23mm;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#777}.photo-print-box img{width:100%;height:100%;object-fit:contain}
+@media(max-width:720px){
+ .corp-hero{grid-template-columns:100px 1fr;min-height:85px}.corp-logo{padding:8px}.corp-logo img{width:90px}.corp-title{padding:8px}.corp-title h1{font-size:15px}.corp-title p{font-size:11px}
+ .corp-section-head{grid-template-columns:45px 1fr}.corp-section-head>span{font-size:20px;padding:10px}.corp-section-head strong{font-size:14px}.corp-section-head small{display:none}
+ .corp-panel{grid-template-columns:1fr;padding:10px}.corp-fields label{grid-template-columns:1fr}.corp-fields label>span{height:auto;min-height:34px;border-radius:7px 7px 0 0;padding:7px 10px}.corp-fields input{border-radius:0 0 7px 7px}.corp-side{border-left:0;border-top:1px solid #d7e0ea;padding:12px 0 0}.corp-side-logo{display:none}.corp-side-btn{width:100%}
+ .corp-create{font-size:17px;padding:14px}.photo-grid{grid-template-columns:1fr}.photo-frame{height:220px}
+}
+
+
+/* V1.5 - Estilo técnico corporativo inspirado en la referencia suministrada */
+.section-title.numbered{display:flex;align-items:center;padding:0;overflow:hidden}
+.section-title.numbered span{background:#ff7417;color:white;font-size:18px;font-weight:900;min-width:44px;text-align:center;padding:8px 5px;margin-right:10px}
+
+.modern-report{font-family:Arial,Helvetica,sans-serif;color:#17202a;background:#fff}
+.modern-head{display:grid;grid-template-columns:29% 51% 20%;border:1px solid #b9c5d0;min-height:25mm}
+.mh-logo{display:flex;align-items:center;padding:2mm 4mm;background:#f7fafc}.mh-logo img{width:100%;height:20mm;object-fit:contain}
+.mh-title{position:relative;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#f3f6f8 0 22%,#ff7417 22% 25%,#0a3f68 25% 30%,#f3f6f8 30% 72%,#0a3f68 72% 77%,#ff7417 77% 80%,#f3f6f8 80%);color:#083d63;font-size:10.2pt;line-height:1.05}
+.mh-title span{font-size:6.6pt;margin-top:2px;font-weight:600}
+.mh-meta{display:grid;grid-template-rows:repeat(4,1fr);font-size:6.5pt}
+.mh-meta div{display:grid;grid-template-columns:45% 55%;align-items:center;border-bottom:1px solid #d6dde4;padding:0 2px}.mh-meta span{font-weight:700}.mh-meta b{text-align:center}
+
+.report-grid-top{display:grid;grid-template-columns:1fr 1fr;gap:1.2mm;margin-top:1.2mm}
+.rbox{border:1px solid #bdc9d3;background:#fff;overflow:hidden}
+.rbox h2{margin:0;background:#0a436d;color:#fff;font-size:7pt;line-height:1;display:flex;align-items:center;min-height:6mm}
+.rbox h2 i{font-style:normal;background:#ff7417;font-size:9pt;min-width:9mm;align-self:stretch;display:flex;align-items:center;justify-content:center;margin-right:2mm}
+.info-lines{padding:1.2mm 2mm;font-size:6.5pt}.info-lines>div{display:grid;grid-template-columns:32% 68%;min-height:4.2mm;align-items:center;border-bottom:1px solid #d8e0e6}.info-lines b{color:#17202a}.info-lines span{background:#f5f8fa;border:1px solid #d7dfe6;min-height:3mm;padding:.5mm 1mm}
+.info-lines .split{grid-template-columns:1fr 1fr 1fr;gap:1mm;border:0}.info-lines .split>div{display:grid;grid-template-columns:auto 1fr;gap:.5mm;align-items:center}
+
+.report-columns{display:grid;grid-template-columns:72% 28%;gap:1.2mm;margin-top:1.2mm}
+.report-left,.report-right{display:flex;flex-direction:column;gap:1.2mm}
+.modern-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:5.35pt}
+.modern-table th{background:#e9eef2;color:#15354e;font-size:5.4pt;padding:.55mm;border:1px solid #c4ced7}
+.modern-table td{padding:.36mm .7mm;border:1px solid #cbd4dc;line-height:1.02;vertical-align:middle}
+.modern-table .c-item{width:8%;text-align:center}.modern-table .c-act{width:48%}.modern-table .c-state{width:12%;text-align:center}.modern-table .c-obs{width:32%}
+.measurements{font-size:5.4pt}.measurements th,.measurements td{text-align:center}
+
+.modern-photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:1mm;padding:1.2mm}
+.modern-photo{height:35mm;background:#f0f4f7;border:1px solid #d5dde4;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;font-size:5.5pt;color:#526574}
+.modern-photo img{width:100%;height:30mm;object-fit:contain;background:#fff}.modern-photo>b{height:4mm;padding-top:.5mm}
+.photo-empty{text-align:center;font-size:16pt;color:#8798a5}.photo-empty span{font-size:5.5pt}
+.findings-box{flex:1}.text-block{padding:1.5mm;font-size:5.8pt;border-bottom:1px solid #d4dde4}.text-block b{color:#0a436d}.text-block p{min-height:14mm;margin:1mm 0 0;background:#f8fafb;border:1px solid #e0e6eb;padding:1mm;white-space:pre-wrap}
+
+.signatures-box{margin-top:1.2mm}
+.modern-signatures{display:grid;grid-template-columns:1fr 1fr .55fr}
+.modern-signatures>div{min-height:24mm;border-right:1px solid #ccd5dc;padding:1.2mm;font-size:5.8pt;display:flex;flex-direction:column}
+.modern-signatures>div:last-child{border-right:0}.modern-signatures span{margin-top:.7mm}.modern-signatures img{height:13mm;width:100%;object-fit:contain;margin-top:auto}
+.close-data{background:#f7f9fb}.report-footer{text-align:center;font-size:5pt;padding:1mm;color:#475569}
+
+
+@media(max-width:720px){
+ .report-grid-top,.report-columns{grid-template-columns:1fr}
+ .modern-head{grid-template-columns:1fr}.mh-title{min-height:75px}.mh-meta{grid-template-rows:repeat(4,28px)}
+ .modern-photo{height:190px}.modern-photo img{height:165px}
+}
+
+/* V1.5.1 A4 vertical: vista previa = PDF */
+#printContent .portrait-report{width:190mm!important;padding:3mm!important;margin:0 auto!important;background:#fff}
+.portrait-head{grid-template-columns:27% 51% 22%!important;min-height:23mm!important}
+.general-full{margin-top:1mm}.general-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7mm 1.5mm;padding:1mm 1.5mm;font-size:6.1pt}.general-grid>div{display:grid;grid-template-columns:34% 66%;align-items:center}.general-grid span{background:#f5f8fa;border:1px solid #d8e0e6;padding:.45mm .8mm}
+.portrait-columns{display:grid;grid-template-columns:68% 32%;gap:1mm;margin-top:1mm;align-items:start}.portrait-right{display:flex;flex-direction:column;gap:1mm}
+.portrait-check{font-size:5.05pt!important}.portrait-check th{font-size:5.1pt!important;padding:.45mm!important}.portrait-check td{padding:.26mm .45mm!important;line-height:1!important}.portrait-check .c-item{width:3%!important;text-align:center}.portrait-check .c-act{width:61%!important;}.portrait-check .c-state{width:5%!important;text-align:center}.portrait-check .c-obs{width:31%!important}
+.check-group td{background:#0a436d!important;color:#fff!important;font-weight:800!important;padding:.7mm 1mm!important}
+.measure-vertical{font-size:5.3pt}.measure-vertical th,.measure-vertical td{text-align:center;padding:.65mm .35mm}
+.portrait-photos .modern-photo{height:36mm}.portrait-photos .modern-photo img{height:31mm;object-fit:contain}
+.findings-wide,.portrait-signatures{margin-top:1mm}.findings-grid{display:grid;grid-template-columns:1fr 1fr}.findings-grid .text-block{border-bottom:0;padding:1mm}.findings-grid .text-block p{min-height:14mm;max-height:18mm;overflow:hidden;margin:.7mm 0 0;padding:.8mm}
+.two-signatures{grid-template-columns:1fr 1fr!important}.two-signatures>div{min-height:21mm}.two-signatures img{height:11mm}
+
+
+
+/* =========================================================
+   V1.5.2 - ÚNICA REGLA DE IMPRESIÓN
+   La geometría de .portrait-report NO cambia al imprimir.
+   ========================================================= */
+@page{
+  size:A4 portrait;
+  margin:10mm;
+}
+
+
+
+/* =========================================================
+   V1.5.3 - IMPRESIÓN A4 VERTICAL
+   Misma composición de vista previa, ampliada uniformemente.
+   ========================================================= */
+@page{
+  size:A4 portrait;
+  margin:5mm;
+}
+
+
+/* V1.5.4 - impresión segura: no se ocultan ancestros del informe */
+@page{size:A4 portrait;margin:5mm}
+
+
+/* =========================================================
+   V1.5.5 - IMPRESIÓN DEFINITIVA AISLADA
+   - Solo se imprime #printContent.
+   - No se ocultan ancestros con display:none.
+   - Se elimina la interfaz de la aplicación.
+   - La plantilla conserva sus proporciones.
+   ========================================================= */
+@page{
+  size:A4 portrait;
+  margin:4mm;
+}
+@media print{
+  html,body{
+    margin:0!important;
+    padding:0!important;
+    width:100%!important;
+    height:auto!important;
+    background:#fff!important;
+    overflow:visible!important;
+  }
+
+  /* Todo queda invisible, pero conserva la jerarquía necesaria */
+  body *{
+    visibility:hidden!important;
+  }
+
+  /* El informe y todos sus hijos sí son imprimibles */
+  #printContent,
+  #printContent *{
+    visibility:visible!important;
+  }
+
+  /*
+    Se saca el informe del flujo de la interfaz.
+    Así encabezado de la app, Inicio y toolbar no reservan espacio.
+  */
+  #printContent{
+    position:absolute!important;
+    left:4mm!important;
+    top:4mm!important;
+    width:202mm!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+
+  /* Mantiene la geometría aprobada y la amplía uniformemente */
+  #printContent .portrait-report{
+    display:block!important;
+    box-sizing:border-box!important;
+    width:190mm!important;
+    min-width:190mm!important;
+    max-width:190mm!important;
+    margin:0!important;
+    padding:3mm!important;
+    background:#fff!important;
+    transform:scale(1.063)!important;
+    transform-origin:top left!important;
+  }
+
+  #printContent .portrait-head{
+    grid-template-columns:27% 51% 22%!important;
+    min-height:23mm!important;
+  }
+  #printContent .general-grid{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+  }
+  #printContent .portrait-columns{
+    display:grid!important;
+    grid-template-columns:68% 32%!important;
+    gap:1mm!important;
+    align-items:start!important;
+  }
+  #printContent .portrait-right{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:1mm!important;
+  }
+  #printContent .portrait-check{
+    font-size:5.05pt!important;
+  }
+  #printContent .portrait-check th{
+    font-size:5.1pt!important;
+    padding:.45mm!important;
+  }
+  #printContent .portrait-check td{
+    padding:.26mm .45mm!important;
+    line-height:1!important;
+  }
+  #printContent .portrait-check .c-item{width:3%!important;}
+  #printContent .portrait-check .c-act{width:61%!important;}
+  #printContent .portrait-check .c-state{width:5%!important;}
+  #printContent .portrait-check .c-obs{width:31%!important}
+
+  #printContent .portrait-photos .modern-photo{height:36mm!important}
+  #printContent .portrait-photos .modern-photo img{
+    height:31mm!important;
+    object-fit:contain!important;
+  }
+
+  #printContent .findings-grid{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+  }
+  #printContent .findings-grid .text-block p{
+    min-height:14mm!important;
+    max-height:18mm!important;
+  }
+
+  #printContent .two-signatures{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+  }
+  #printContent .two-signatures>div{min-height:21mm!important}
+  #printContent .two-signatures img{height:11mm!important}
+
+  #printContent .rbox,
+  #printContent table,
+  #printContent tr,
+  #printContent .modern-photo,
+  #printContent .modern-signatures{
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+}
+
+
+/* ================= V1.5.6 ================= */
+.portrait-check{table-layout:fixed!important;width:100%!important}
+.portrait-check .c-item{width:3%!important;text-align:center}
+.portrait-check .c-act{width:61%!important}
+.portrait-check .c-state{width:5%!important;text-align:center}
+.portrait-check .c-obs{width:31%!important}
+
+/* Mediciones: cuatro bloques verticales compactos */
+.measure-stack{display:flex;flex-direction:column;gap:.8mm;padding:1mm}
+.measure-card{width:100%;border-collapse:collapse;table-layout:fixed;font-size:5.1pt}
+.measure-card th{background:#f68b1f!important;color:#fff!important;border:1px solid #d3dce4;padding:.65mm .5mm;text-align:center;font-weight:800}
+.measure-card td{border:1px solid #cbd6df;padding:.48mm .7mm;background:#fff}
+.measure-card td:first-child{width:48%;font-weight:700;background:#f5f8fa}
+.measure-card td:last-child{width:52%;text-align:center}
+
+/* Conservar colores corporativos en navegadores Chromium al imprimir */
+#printContent,#printContent *{
+  -webkit-print-color-adjust:exact!important;
+  print-color-adjust:exact!important;
+}
+@media print{
+  #printContent,#printContent *{
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+  #printContent .portrait-check .c-item{width:3%!important}
+  #printContent .portrait-check .c-act{width:61%!important}
+  #printContent .portrait-check .c-state{width:5%!important}
+  #printContent .portrait-check .c-obs{width:31%!important}
+  #printContent .measure-stack{display:flex!important;flex-direction:column!important;gap:.8mm!important;padding:1mm!important}
+  #printContent .measure-card th{background:#f68b1f!important;color:#fff!important}
+  #printContent .check-group td,
+  #printContent .rbox h2{ -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+}
+
+
+/* =========================================================
+   V1.5.7 - AJUSTE FINAL DE COLUMNAS SECCIÓN 2
+   Ítem 3% | Actividad 61% | Estado 5% | Observación 31%
+   ========================================================= */
+.portrait-check{
+  width:100%!important;
+  table-layout:fixed!important;
+}
+.portrait-check .c-item{
+  width:3%!important;
+  min-width:0!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+}
+.portrait-check .c-act{
+  width:61%!important;
+}
+.portrait-check .c-state{
+  width:5%!important;
+  min-width:0!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+}
+.portrait-check .c-obs{
+  width:31%!important;
+}
+
+@media print{
+  #printContent .portrait-check{
+    width:100%!important;
+    table-layout:fixed!important;
+  }
+  #printContent .portrait-check .c-item{width:3%!important;min-width:0!important}
+  #printContent .portrait-check .c-act{width:61%!important}
+  #printContent .portrait-check .c-state{width:5%!important;min-width:0!important}
+  #printContent .portrait-check .c-obs{width:31%!important}
+}
+
+
+/* =========================================================
+   V1.5.8 - COLUMNAS FIJAS REALES DEL CHECKLIST
+   Se usa COLGROUP para impedir redistribución automática.
+   ========================================================= */
+.portrait-check{
+  width:100%!important;
+  table-layout:fixed!important;
+}
+.portrait-check col.col-item{width:9mm!important}
+.portrait-check col.col-act{width:70mm!important}
+.portrait-check col.col-state{width:12mm!important}
+.portrait-check col.col-obs{width:auto!important}
+
+/* Los anchos se gobiernan por colgroup, no por las celdas */
+.portrait-check .c-item,
+.portrait-check .c-act,
+.portrait-check .c-state,
+.portrait-check .c-obs{
+  width:auto!important;
+}
+.portrait-check .c-item,
+.portrait-check .c-state{
+  text-align:center!important;
+  white-space:nowrap!important;
+}
+
+@media print{
+  #printContent .portrait-check{
+    width:100%!important;
+    table-layout:fixed!important;
+  }
+  #printContent .portrait-check col.col-item{width:9mm!important}
+  #printContent .portrait-check col.col-act{width:70mm!important}
+  #printContent .portrait-check col.col-state{width:12mm!important}
+  #printContent .portrait-check col.col-obs{width:auto!important}
+  #printContent .portrait-check .c-item,
+  #printContent .portrait-check .c-act,
+  #printContent .portrait-check .c-state,
+  #printContent .portrait-check .c-obs{width:auto!important}
+}
+
+
+/* =========================================================
+   V1.5.9 - AJUSTE DE ESPACIOS VERTICALES
+   Objetivo: eliminar el vacío entre Registro Fotográfico
+   y Hallazgos sin cambiar la estructura aprobada.
+   ========================================================= */
+
+/* La columna derecha no debe estirar sus cajas para igualar la izquierda */
+.portrait-columns{
+  align-items:start!important;
+}
+.portrait-right{
+  align-self:start!important;
+  height:auto!important;
+  min-height:0!important;
+}
+.portrait-right > .rbox,
+.measurements-box,
+.portrait-photos{
+  height:auto!important;
+  min-height:0!important;
+}
+
+/* Fotos más compactas: suficiente para 2 evidencias sin dejar caja vacía */
+.portrait-photos{
+  margin-bottom:0!important;
+}
+.portrait-photos .photo-grid,
+.portrait-photos .modern-photo{
+  min-height:0!important;
+}
+.portrait-photos .modern-photo{
+  height:31mm!important;
+}
+.portrait-photos .modern-photo img{
+  height:25mm!important;
+  max-height:25mm!important;
+  object-fit:contain!important;
+}
+
+/* Hallazgos y firmas siguen inmediatamente después del bloque superior */
+.portrait-report > .rbox{
+  margin-top:1mm!important;
+  margin-bottom:0!important;
+}
+.findings-grid .text-block p{
+  min-height:12mm!important;
+  max-height:15mm!important;
+}
+.two-signatures > div{
+  min-height:18mm!important;
+}
+.two-signatures img{
+  height:9mm!important;
+  max-height:9mm!important;
+}
+
+/* Mantener el pie cercano al cierre, sin espacio artificial */
+.portrait-report .report-footer,
+.portrait-report footer{
+  margin-top:.8mm!important;
+}
+
+/* Impresión: mismas reglas que la vista previa */
+@media print{
+  #printContent .portrait-columns{align-items:start!important}
+  #printContent .portrait-right{
+    align-self:start!important;
+    height:auto!important;
+    min-height:0!important;
+  }
+  #printContent .portrait-right > .rbox,
+  #printContent .measurements-box,
+  #printContent .portrait-photos{
+    height:auto!important;
+    min-height:0!important;
+  }
+  #printContent .portrait-photos .modern-photo{height:31mm!important}
+  #printContent .portrait-photos .modern-photo img{
+    height:25mm!important;
+    max-height:25mm!important;
+    object-fit:contain!important;
+  }
+  #printContent .portrait-report > .rbox{
+    margin-top:1mm!important;
+    margin-bottom:0!important;
+  }
+  #printContent .findings-grid .text-block p{
+    min-height:12mm!important;
+    max-height:15mm!important;
+  }
+  #printContent .two-signatures > div{min-height:18mm!important}
+  #printContent .two-signatures img{
+    height:9mm!important;
+    max-height:9mm!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.0 - APROVECHAMIENTO VERTICAL Y LEGIBILIDAD
+   Basado en la distribución aprobada de V1.5.9.
+   ========================================================= */
+
+/* Un poco más de aire en el checklist para ocupar la altura útil
+   sin alterar los anchos fijados por COLGROUP. */
+.portrait-check{
+  font-size:5.45pt!important;
+}
+.portrait-check th{
+  font-size:5.45pt!important;
+  padding:.52mm .45mm!important;
+  line-height:1.05!important;
+}
+.portrait-check td{
+  padding:.38mm .48mm!important;
+  line-height:1.08!important;
+  vertical-align:middle!important;
+}
+.portrait-check .check-group td{
+  padding:.46mm .48mm!important;
+  line-height:1.05!important;
+}
+
+/* Mantener exactamente los anchos aprobados */
+.portrait-check col.col-item{width:9mm!important}
+.portrait-check col.col-act{width:70mm!important}
+.portrait-check col.col-state{width:12mm!important}
+.portrait-check col.col-obs{width:auto!important}
+
+/* Columna derecha: mediciones compactas y fotografías algo mayores */
+.measure-stack{
+  gap:.65mm!important;
+  padding:.8mm!important;
+}
+.measure-card{
+  font-size:5.2pt!important;
+}
+.measure-card th{
+  padding:.62mm .5mm!important;
+}
+.measure-card td{
+  padding:.42mm .65mm!important;
+}
+
+.portrait-photos .modern-photo{
+  height:34mm!important;
+}
+.portrait-photos .modern-photo img{
+  height:28mm!important;
+  max-height:28mm!important;
+  object-fit:contain!important;
+}
+
+/* Secciones inferiores: aprovechar ancho y altura sin huecos artificiales */
+.portrait-report > .rbox{
+  margin-top:.75mm!important;
+}
+.findings-grid{
+  gap:.8mm!important;
+}
+.findings-grid .text-block p{
+  min-height:15mm!important;
+  max-height:18mm!important;
+  padding:.8mm!important;
+}
+.two-signatures > div{
+  min-height:20mm!important;
+}
+.two-signatures img{
+  height:10.5mm!important;
+  max-height:10.5mm!important;
+}
+
+/* Mismo resultado en PDF */
+@media print{
+  #printContent .portrait-check{
+    font-size:5.45pt!important;
+  }
+  #printContent .portrait-check th{
+    font-size:5.45pt!important;
+    padding:.52mm .45mm!important;
+    line-height:1.05!important;
+  }
+  #printContent .portrait-check td{
+    padding:.38mm .48mm!important;
+    line-height:1.08!important;
+    vertical-align:middle!important;
+  }
+  #printContent .portrait-check .check-group td{
+    padding:.46mm .48mm!important;
+  }
+
+  #printContent .portrait-check col.col-item{width:9mm!important}
+  #printContent .portrait-check col.col-act{width:70mm!important}
+  #printContent .portrait-check col.col-state{width:12mm!important}
+  #printContent .portrait-check col.col-obs{width:auto!important}
+
+  #printContent .measure-stack{
+    gap:.65mm!important;
+    padding:.8mm!important;
+  }
+  #printContent .measure-card{font-size:5.2pt!important}
+  #printContent .measure-card th{padding:.62mm .5mm!important}
+  #printContent .measure-card td{padding:.42mm .65mm!important}
+
+  #printContent .portrait-photos .modern-photo{height:34mm!important}
+  #printContent .portrait-photos .modern-photo img{
+    height:28mm!important;
+    max-height:28mm!important;
+    object-fit:contain!important;
+  }
+
+  #printContent .findings-grid .text-block p{
+    min-height:15mm!important;
+    max-height:18mm!important;
+    padding:.8mm!important;
+  }
+  #printContent .two-signatures > div{min-height:20mm!important}
+  #printContent .two-signatures img{
+    height:10.5mm!important;
+    max-height:10.5mm!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.1 - ESCALADO UNIFORME DEL INFORME COMPLETO
+   Mantiene la geometría V1.6.0 y aprovecha la altura A4.
+   ========================================================= */
+
+/*
+  La plantilla base continúa en 190 mm.
+  En vista previa se aumenta uniformemente, sin alterar
+  columnas, tablas, fotos, hallazgos ni firmas.
+*/
+#printContent{
+  overflow:visible!important;
+}
+#printContent .portrait-report{
+  transform:scale(1.12)!important;
+  transform-origin:top center!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+
+/* Reservar visualmente la altura escalada en la vista previa */
+@media screen{
+  #printContent{
+    padding-bottom:32mm!important;
+  }
+}
+
+/* En impresión se aprovecha casi todo el ancho útil del A4.
+   Escala 1.06 aprox. = 190 mm -> 201.4 mm */
+@media print{
+  #printContent{
+    width:202mm!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+  #printContent .portrait-report{
+    width:190mm!important;
+    min-width:190mm!important;
+    max-width:190mm!important;
+    transform:scale(1.06)!important;
+    transform-origin:top left!important;
+    margin:0!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.2 - AJUSTE DE ALTURA
+   Se mantiene la geometría horizontal V1.6.1.
+   Se aprovecha la altura A4 aumentando espacios útiles.
+   ========================================================= */
+
+/* Evitar que el escalado anterior de pantalla sea el responsable
+   del tamaño: se conserva el ancho y se trabaja la altura interna. */
+@media screen{
+  #printContent .portrait-report{
+    transform:scale(1.06)!important;
+    transform-origin:top center!important;
+  }
+  #printContent{padding-bottom:18mm!important}
+}
+
+/* Información general ligeramente más alta */
+.general-grid > div,
+.general-grid .field{
+  min-height:4.7mm!important;
+}
+
+/* Checklist: mayor altura de filas y mejor lectura */
+.portrait-check{
+  font-size:5.65pt!important;
+}
+.portrait-check th{
+  font-size:5.65pt!important;
+  padding:.62mm .48mm!important;
+  line-height:1.08!important;
+}
+.portrait-check td{
+  padding:.52mm .50mm!important;
+  line-height:1.12!important;
+  vertical-align:middle!important;
+}
+.portrait-check .check-group td{
+  padding:.58mm .50mm!important;
+  line-height:1.08!important;
+}
+
+/* Mediciones: algo más altas para acompañar el checklist */
+.measure-stack{
+  gap:.85mm!important;
+  padding:1mm!important;
+}
+.measure-card{
+  font-size:5.35pt!important;
+}
+.measure-card th{
+  padding:.78mm .55mm!important;
+}
+.measure-card td{
+  padding:.62mm .7mm!important;
+  line-height:1.08!important;
+}
+
+/* Fotografías más altas, sin alterar el ancho */
+.portrait-photos .modern-photo{
+  height:40mm!important;
+}
+.portrait-photos .modern-photo img{
+  height:33mm!important;
+  max-height:33mm!important;
+  object-fit:contain!important;
+}
+
+/* Dar más área real para redacción */
+.findings-grid .text-block p{
+  min-height:21mm!important;
+  max-height:24mm!important;
+  padding:1mm!important;
+  line-height:1.18!important;
+}
+
+/* Firmas: mayor altura útil */
+.two-signatures > div{
+  min-height:27mm!important;
+  padding-bottom:1mm!important;
+}
+.two-signatures img{
+  height:15mm!important;
+  max-height:15mm!important;
+  object-fit:contain!important;
+}
+
+/* Separaciones verticales moderadas entre bloques */
+.portrait-report > .rbox{
+  margin-top:1.15mm!important;
+}
+.portrait-report .report-footer,
+.portrait-report footer{
+  margin-top:1mm!important;
+}
+
+/* PDF: mantener el ancho actual y aplicar exactamente el crecimiento vertical */
+@media print{
+  #printContent .portrait-report{
+    transform:scale(1.06)!important;
+    transform-origin:top left!important;
+  }
+
+  #printContent .general-grid > div,
+  #printContent .general-grid .field{min-height:4.7mm!important}
+
+  #printContent .portrait-check{font-size:5.65pt!important}
+  #printContent .portrait-check th{
+    font-size:5.65pt!important;
+    padding:.62mm .48mm!important;
+    line-height:1.08!important;
+  }
+  #printContent .portrait-check td{
+    padding:.52mm .50mm!important;
+    line-height:1.12!important;
+  }
+  #printContent .portrait-check .check-group td{
+    padding:.58mm .50mm!important;
+  }
+
+  #printContent .measure-stack{
+    gap:.85mm!important;
+    padding:1mm!important;
+  }
+  #printContent .measure-card{font-size:5.35pt!important}
+  #printContent .measure-card th{padding:.78mm .55mm!important}
+  #printContent .measure-card td{padding:.62mm .7mm!important}
+
+  #printContent .portrait-photos .modern-photo{height:40mm!important}
+  #printContent .portrait-photos .modern-photo img{
+    height:33mm!important;
+    max-height:33mm!important;
+  }
+
+  #printContent .findings-grid .text-block p{
+    min-height:21mm!important;
+    max-height:24mm!important;
+    padding:1mm!important;
+  }
+
+  #printContent .two-signatures > div{
+    min-height:27mm!important;
+    padding-bottom:1mm!important;
+  }
+  #printContent .two-signatures img{
+    height:15mm!important;
+    max-height:15mm!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.3 - DISTRIBUCIÓN VERTICAL FINAL
+   Aprovecha el espacio inferior sin modificar la geometría horizontal.
+   ========================================================= */
+
+/* Checklist: incremento moderado de altura, no de ancho */
+.portrait-check{
+  font-size:5.75pt!important;
+}
+.portrait-check th{
+  font-size:5.75pt!important;
+  padding:.68mm .48mm!important;
+  line-height:1.10!important;
+}
+.portrait-check td{
+  padding:.60mm .50mm!important;
+  line-height:1.14!important;
+  vertical-align:middle!important;
+}
+.portrait-check .check-group td{
+  padding:.66mm .50mm!important;
+}
+
+/* Mantener columnas aprobadas */
+.portrait-check col.col-item{width:9mm!important}
+.portrait-check col.col-act{width:70mm!important}
+.portrait-check col.col-state{width:12mm!important}
+.portrait-check col.col-obs{width:auto!important}
+
+/* Mediciones: acompañar el crecimiento del checklist */
+.measure-card th{padding:.86mm .55mm!important}
+.measure-card td{padding:.72mm .70mm!important}
+
+/* Fotos: mantener proporción, solo pequeño aumento vertical */
+.portrait-photos .modern-photo{height:42mm!important}
+.portrait-photos .modern-photo img{
+  height:35mm!important;
+  max-height:35mm!important;
+  object-fit:contain!important;
+}
+
+/* El espacio recuperado se dedica principalmente a hallazgos */
+.findings-grid .text-block p{
+  min-height:28mm!important;
+  max-height:31mm!important;
+  padding:1.15mm!important;
+  line-height:1.20!important;
+}
+
+/* Firmas con área más cómoda */
+.two-signatures > div{
+  min-height:32mm!important;
+  padding:1mm!important;
+}
+.two-signatures img{
+  height:18mm!important;
+  max-height:18mm!important;
+  object-fit:contain!important;
+}
+
+/* Separación controlada */
+.portrait-report > .rbox{
+  margin-top:1.25mm!important;
+}
+.portrait-report .report-footer,
+.portrait-report footer{
+  margin-top:1mm!important;
+}
+
+/* Vista previa: conservar escala horizontal aprobada */
+@media screen{
+  #printContent .portrait-report{
+    transform:scale(1.06)!important;
+    transform-origin:top center!important;
+  }
+  #printContent{padding-bottom:10mm!important}
+}
+
+/* PDF: replicar exactamente los ajustes verticales */
+@media print{
+  #printContent .portrait-report{
+    transform:scale(1.06)!important;
+    transform-origin:top left!important;
+  }
+  #printContent .portrait-check{font-size:5.75pt!important}
+  #printContent .portrait-check th{
+    font-size:5.75pt!important;
+    padding:.68mm .48mm!important;
+    line-height:1.10!important;
+  }
+  #printContent .portrait-check td{
+    padding:.60mm .50mm!important;
+    line-height:1.14!important;
+  }
+  #printContent .portrait-check .check-group td{
+    padding:.66mm .50mm!important;
+  }
+  #printContent .measure-card th{padding:.86mm .55mm!important}
+  #printContent .measure-card td{padding:.72mm .70mm!important}
+  #printContent .portrait-photos .modern-photo{height:42mm!important}
+  #printContent .portrait-photos .modern-photo img{
+    height:35mm!important;
+    max-height:35mm!important;
+  }
+  #printContent .findings-grid .text-block p{
+    min-height:28mm!important;
+    max-height:31mm!important;
+    padding:1.15mm!important;
+    line-height:1.20!important;
+  }
+  #printContent .two-signatures > div{
+    min-height:32mm!important;
+    padding:1mm!important;
+  }
+  #printContent .two-signatures img{
+    height:18mm!important;
+    max-height:18mm!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.4 - AJUSTE FINO DE LEGIBILIDAD Y MARGEN INFERIOR
+   Base: distribución V1.6.3 aprobada.
+   ========================================================= */
+
+/* Texto de actividades ligeramente mayor sin aumentar el ancho total */
+.portrait-check{
+  font-size:5.95pt!important;
+}
+.portrait-check th{
+  font-size:5.85pt!important;
+}
+.portrait-check td{
+  line-height:1.15!important;
+}
+
+/* Redistribución fina:
+   Ítem y Estado siguen compactos; Actividad gana espacio.
+   Observación conserva área suficiente para anotaciones. */
+.portrait-check col.col-item{width:8mm!important}
+.portrait-check col.col-act{width:74mm!important}
+.portrait-check col.col-state{width:11mm!important}
+.portrait-check col.col-obs{width:auto!important}
+
+/* Hallazgos queda con la altura lograda en V1.6.3 */
+.findings-grid .text-block p{
+  min-height:28mm!important;
+  max-height:31mm!important;
+}
+
+/* Firmas ligeramente más compactas para dejar margen inferior seguro */
+.two-signatures > div{
+  min-height:27mm!important;
+  padding:.8mm!important;
+}
+.two-signatures img{
+  height:14mm!important;
+  max-height:14mm!important;
+  object-fit:contain!important;
+}
+
+/* Un pequeño margen de seguridad antes del pie */
+.portrait-report .report-footer,
+.portrait-report footer{
+  margin-top:.7mm!important;
+  margin-bottom:1.5mm!important;
+}
+
+@media print{
+  #printContent .portrait-check{font-size:5.95pt!important}
+  #printContent .portrait-check th{font-size:5.85pt!important}
+  #printContent .portrait-check td{line-height:1.15!important}
+
+  #printContent .portrait-check col.col-item{width:8mm!important}
+  #printContent .portrait-check col.col-act{width:74mm!important}
+  #printContent .portrait-check col.col-state{width:11mm!important}
+  #printContent .portrait-check col.col-obs{width:auto!important}
+
+  #printContent .findings-grid .text-block p{
+    min-height:28mm!important;
+    max-height:31mm!important;
+  }
+
+  #printContent .two-signatures > div{
+    min-height:27mm!important;
+    padding:.8mm!important;
+  }
+  #printContent .two-signatures img{
+    height:14mm!important;
+    max-height:14mm!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.5 - MAYOR ALTURA EN SECCIÓN 2
+   Objetivo: aprovechar el espacio vertical disponible.
+   No se altera la distribución horizontal de V1.6.4.
+   ========================================================= */
+
+.portrait-check th{
+  padding:.78mm .48mm!important;
+  line-height:1.12!important;
+}
+.portrait-check td{
+  padding:.78mm .50mm!important;
+  line-height:1.18!important;
+  vertical-align:middle!important;
+}
+.portrait-check .check-group td{
+  padding:.82mm .50mm!important;
+  line-height:1.12!important;
+}
+
+/* Mantener anchos V1.6.4 */
+.portrait-check col.col-item{width:8mm!important}
+.portrait-check col.col-act{width:74mm!important}
+.portrait-check col.col-state{width:11mm!important}
+.portrait-check col.col-obs{width:auto!important}
+
+@media print{
+  #printContent .portrait-check th{
+    padding:.78mm .48mm!important;
+    line-height:1.12!important;
+  }
+  #printContent .portrait-check td{
+    padding:.78mm .50mm!important;
+    line-height:1.18!important;
+    vertical-align:middle!important;
+  }
+  #printContent .portrait-check .check-group td{
+    padding:.82mm .50mm!important;
+    line-height:1.12!important;
+  }
+
+  #printContent .portrait-check col.col-item{width:8mm!important}
+  #printContent .portrait-check col.col-act{width:74mm!important}
+  #printContent .portrait-check col.col-state{width:11mm!important}
+  #printContent .portrait-check col.col-obs{width:auto!important}
+}
+
+
+/* =========================================================
+   V1.6.6 - AJUSTE FINO DE ALTURA SECCIÓN 2
+   V1.6.5 quedó ligeramente alta.
+   Se reduce solo el padding vertical del checklist.
+   ========================================================= */
+
+.portrait-check th{
+  padding:.70mm .48mm!important;
+  line-height:1.11!important;
+}
+.portrait-check td{
+  padding:.68mm .50mm!important;
+  line-height:1.16!important;
+  vertical-align:middle!important;
+}
+.portrait-check .check-group td{
+  padding:.72mm .50mm!important;
+  line-height:1.11!important;
+}
+
+/* Mantener exactamente la geometría horizontal */
+.portrait-check col.col-item{width:8mm!important}
+.portrait-check col.col-act{width:74mm!important}
+.portrait-check col.col-state{width:11mm!important}
+.portrait-check col.col-obs{width:auto!important}
+
+@media print{
+  #printContent .portrait-check th{
+    padding:.70mm .48mm!important;
+    line-height:1.11!important;
+  }
+  #printContent .portrait-check td{
+    padding:.68mm .50mm!important;
+    line-height:1.16!important;
+    vertical-align:middle!important;
+  }
+  #printContent .portrait-check .check-group td{
+    padding:.72mm .50mm!important;
+    line-height:1.11!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.7 - ALINEACIÓN AUTOMÁTICA SECCIÓN 2 / REGISTRO FOTOGRÁFICO
+   Ya no se ajusta por ensayo/error.
+   Las dos columnas del bloque superior se estiran a la misma altura.
+   ========================================================= */
+
+/* El grid define una única altura de fila: la del contenido más alto. */
+.portrait-columns{
+  display:grid!important;
+  grid-template-columns:minmax(0, 2.18fr) minmax(0, 1fr)!important;
+  align-items:stretch!important;
+}
+
+/* Ambas columnas ocupan exactamente la misma altura del grid. */
+.portrait-left,
+.portrait-right{
+  height:100%!important;
+  min-height:0!important;
+}
+
+/* La Sección 2 se convierte en flex y su tabla llena la columna izquierda. */
+.portrait-left{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.portrait-left .portrait-check{
+  flex:1 1 auto!important;
+  height:100%!important;
+}
+
+/* La tabla reparte su altura automáticamente entre sus filas.
+   Esto hace que el borde inferior de Sección 2 coincida con el
+   borde inferior del Registro Fotográfico, cualquiera sea el zoom. */
+.portrait-left .portrait-check tbody tr:not(.check-group){
+  height:auto!important;
+}
+.portrait-left .portrait-check td{
+  height:auto!important;
+}
+
+/* La columna derecha conserva mediciones arriba y fotos debajo,
+   pero se estira exactamente hasta la misma línea inferior. */
+.portrait-right{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.portrait-right .measurements-box{
+  flex:0 0 auto!important;
+}
+.portrait-right .portrait-photos{
+  flex:1 1 auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+.portrait-right .portrait-photos .photo-grid{
+  flex:1 1 auto!important;
+  align-items:stretch!important;
+}
+.portrait-right .portrait-photos .modern-photo{
+  height:100%!important;
+  min-height:0!important;
+}
+
+/* Hallazgos empieza justo después de la línea común de ambas columnas. */
+.portrait-columns + .rbox{
+  clear:both!important;
+}
+
+/* Misma geometría al imprimir/PDF. */
+@media print{
+  #printContent .portrait-columns{
+    display:grid!important;
+    grid-template-columns:minmax(0, 2.18fr) minmax(0, 1fr)!important;
+    align-items:stretch!important;
+  }
+  #printContent .portrait-left,
+  #printContent .portrait-right{
+    height:100%!important;
+    min-height:0!important;
+  }
+  #printContent .portrait-left{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #printContent .portrait-left .portrait-check{
+    flex:1 1 auto!important;
+    height:100%!important;
+  }
+  #printContent .portrait-right{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #printContent .portrait-right .measurements-box{
+    flex:0 0 auto!important;
+  }
+  #printContent .portrait-right .portrait-photos{
+    flex:1 1 auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #printContent .portrait-right .portrait-photos .photo-grid{
+    flex:1 1 auto!important;
+    align-items:stretch!important;
+  }
+  #printContent .portrait-right .portrait-photos .modern-photo{
+    height:100%!important;
+    min-height:0!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.8 - CORRECCIÓN REAL DE ALINEACIÓN CON FOTOGRAFÍAS
+   V1.6.7 tenía dos selectores que no coincidían con el HTML:
+   - faltaba class="portrait-left" en la columna izquierda
+   - el HTML usa .modern-photo-grid, no .photo-grid
+   Esta versión corrige ambos puntos.
+   ========================================================= */
+
+.portrait-columns{
+  display:grid!important;
+  grid-template-columns:minmax(0, 2.18fr) minmax(0, 1fr)!important;
+  align-items:stretch!important;
+}
+
+.portrait-left,
+.portrait-right{
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+}
+
+/* La caja completa de Sección 2 ocupa toda la altura común */
+.portrait-left{
+  display:flex!important;
+}
+.portrait-left > .rbox{
+  flex:1 1 auto!important;
+  width:100%!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+}
+.portrait-left .portrait-check{
+  flex:1 1 auto!important;
+  height:100%!important;
+  margin-bottom:0!important;
+}
+
+/* Columna derecha: mediciones arriba, fotos ocupan el resto */
+.portrait-right{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.portrait-right .measurements-box{
+  flex:0 0 auto!important;
+}
+.portrait-right .portrait-photos{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+.portrait-right .portrait-photos .modern-photo-grid{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  align-items:stretch!important;
+}
+.portrait-right .portrait-photos .modern-photo{
+  min-width:0!important;
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+}
+.portrait-right .portrait-photos .modern-photo img{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  flex:1 1 auto!important;
+}
+
+/* La imagen nunca puede aumentar la altura de la fila del grid */
+.portrait-right img{
+  max-width:100%!important;
+}
+
+/* PDF: exactamente la misma lógica */
+@media print{
+  #printContent .portrait-columns{
+    display:grid!important;
+    grid-template-columns:minmax(0, 2.18fr) minmax(0, 1fr)!important;
+    align-items:stretch!important;
+  }
+  #printContent .portrait-left,
+  #printContent .portrait-right{
+    min-width:0!important;
+    min-height:0!important;
+    height:100%!important;
+  }
+  #printContent .portrait-left{
+    display:flex!important;
+  }
+  #printContent .portrait-left > .rbox{
+    flex:1 1 auto!important;
+    width:100%!important;
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:0!important;
+  }
+  #printContent .portrait-left .portrait-check{
+    flex:1 1 auto!important;
+    height:100%!important;
+    margin-bottom:0!important;
+  }
+  #printContent .portrait-right{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #printContent .portrait-right .measurements-box{
+    flex:0 0 auto!important;
+  }
+  #printContent .portrait-right .portrait-photos{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+  #printContent .portrait-right .portrait-photos .modern-photo-grid{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:auto!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    align-items:stretch!important;
+  }
+  #printContent .portrait-right .portrait-photos .modern-photo{
+    min-width:0!important;
+    min-height:0!important;
+    height:100%!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+  }
+  #printContent .portrait-right .portrait-photos .modern-photo img{
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    object-fit:contain!important;
+    flex:1 1 auto!important;
+  }
+}
+
+
+/* V1.6.9 - Inicio: contenido centrado + logo decorativo nuevo */
+.control-row .control-label{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+}
+.control-row input{
+  text-align:center!important;
+}
+.corp-side-logo{
+  width:100%!important;
+  max-width:430px!important;
+  height:auto!important;
+  object-fit:contain!important;
+  display:block!important;
+  margin:auto!important;
+}
+
+
+/* =========================================================
+   V1.6.10 - AJUSTES DE PANTALLA INICIO
+   ========================================================= */
+
+/* 1. Centrado real vertical y horizontal del contenido de las casillas */
+.control-row{
+  align-items:stretch!important;
+}
+.control-row .control-label{
+  min-height:38px!important;
+  height:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  padding:4px 10px!important;
+  box-sizing:border-box!important;
+}
+.control-row input,
+.control-row select{
+  min-height:38px!important;
+  height:38px!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+  line-height:38px!important;
+  text-align:center!important;
+  box-sizing:border-box!important;
+}
+
+/* 2. Botones laterales con exactamente la misma geometría */
+.side-actions{
+  width:100%!important;
+}
+.side-actions button,
+.side-actions .btn,
+.side-actions label,
+.side-actions a{
+  width:100%!important;
+  min-height:38px!important;
+  height:38px!important;
+  margin:5px 0!important;
+  padding:0 10px!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  line-height:1.1!important;
+  border-radius:7px!important;
+}
+
+/* El input de importación permanece oculto; solo se ve su botón/label */
+.side-actions input[type="file"]{
+  display:none!important;
+}
+
+/* 3. Logo grande: aprovechar el espacio libre sin deformarlo */
+.corp-side-logo{
+  width:100%!important;
+  max-width:520px!important;
+  height:190px!important;
+  max-height:190px!important;
+  object-fit:contain!important;
+  display:block!important;
+  margin:2px auto 10px auto!important;
+}
+
+/* Columna lateral mejor aprovechada */
+.control-side,
+.control-actions,
+.home-side{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  justify-content:flex-start!important;
+}
+
+/* Android / pantallas angostas */
+@media (max-width:700px){
+  .corp-side-logo{
+    height:155px!important;
+    max-height:155px!important;
+  }
+  .control-row .control-label,
+  .control-row input,
+  .control-row select{
+    min-height:42px!important;
+  }
+}
+
+
+/* V1.6.11 - Importar respaldo igual a Exportar respaldo */
+#importBackupLabel,
+label[for="importBackup"],
+label[for="importFile"],
+.import-backup-label{
+  width:100%!important;
+  min-height:38px!important;
+  height:38px!important;
+  margin:5px 0!important;
+  padding:0 10px!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  line-height:1.1!important;
+  border:1px solid #9db8d6!important;
+  border-radius:7px!important;
+  background:#eef6fd!important;
+  color:#003b70!important;
+  font:inherit!important;
+  font-weight:600!important;
+  cursor:pointer!important;
+}
+
+/* ocultar el input real de archivo */
+#importBackup,
+#importFile,
+input[type="file"][accept*="json"]{
+  display:none!important;
+}
+
+
+/* =========================================================
+   V1.6.12 - CORRECCIÓN BOTÓN IMPORTAR RESPALDO
+   Selector real: label.corp-side-btn.import
+   ========================================================= */
+label.corp-side-btn.import{
+  width:100%!important;
+  min-height:38px!important;
+  height:38px!important;
+  margin:5px 0!important;
+  padding:0 10px!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  line-height:1.1!important;
+  border:1px solid #9db8d6!important;
+  border-radius:7px!important;
+  background:#eef6fd!important;
+  color:#003b70!important;
+  font-family:inherit!important;
+  font-size:inherit!important;
+  font-weight:600!important;
+  cursor:pointer!important;
+}
+
+/* El input real permanece invisible dentro del label */
+label.corp-side-btn.import input[type="file"],
+#fileBackup{
+  display:none!important;
+}
+
+/* Igualar interacción visual con los otros botones */
+label.corp-side-btn.import:hover{
+  background:#e2f0fb!important;
+}
+
+
+/* =========================================================
+   V1.6.13 - LOS 3 BOTONES LATERALES EXACTAMENTE IGUALES
+   ========================================================= */
+#btnHistory,
+#btnBackup,
+label.corp-side-btn.import{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  height:38px!important;
+  min-height:38px!important;
+  max-height:38px!important;
+  margin:5px 0!important;
+  padding:0 10px!important;
+  box-sizing:border-box!important;
+
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+
+  border:1px solid #9db8d6!important;
+  border-radius:7px!important;
+  background:#eef6fd!important;
+  color:#003b70!important;
+
+  font-family:Arial, sans-serif!important;
+  font-size:12px!important;
+  font-weight:600!important;
+  line-height:1!important;
+  text-align:center!important;
+  text-decoration:none!important;
+  white-space:nowrap!important;
+
+  appearance:none!important;
+  -webkit-appearance:none!important;
+}
+
+label.corp-side-btn.import{
+  cursor:pointer!important;
+}
+
+label.corp-side-btn.import #fileBackup{
+  display:none!important;
+}
+
+
+/* =========================================================
+   V1.6.14 - ENCABEZADO DEL INFORME MÁS LIMPIO
+   Inspirado en el estilo corporativo del Inicio:
+   azul oscuro + acentos naranja, sin diagonales sobre el texto.
+   ========================================================= */
+
+.portrait-report .report-head,
+#printContent .report-head{
+  position:relative!important;
+  overflow:hidden!important;
+  background:#f7fafc!important;
+}
+
+/* Limpiar adornos diagonales previos que cruzaban el título */
+.portrait-report .report-head::before,
+.portrait-report .report-head::after,
+#printContent .report-head::before,
+#printContent .report-head::after{
+  content:none!important;
+  display:none!important;
+}
+
+/* Zona central del título: banda azul limpia */
+.portrait-report .report-title,
+#printContent .report-title{
+  position:relative!important;
+  z-index:2!important;
+  background:#073f6f!important;
+  color:#fff!important;
+  padding:3.2mm 5mm 3.8mm!important;
+  text-align:center!important;
+  overflow:hidden!important;
+}
+
+/* Quitar pseudo-elementos/decoraciones que puedan pasar por las letras */
+.portrait-report .report-title::before,
+.portrait-report .report-title::after,
+#printContent .report-title::before,
+#printContent .report-title::after{
+  content:none!important;
+  display:none!important;
+}
+
+/* Línea naranja corporativa bajo el título */
+.portrait-report .report-title{
+  border-bottom:1.5mm solid #ff6f00!important;
+}
+#printContent .report-title{
+  border-bottom:1.5mm solid #ff6f00!important;
+}
+
+/* Máxima legibilidad del texto */
+.portrait-report .report-title h1,
+.portrait-report .report-title h2,
+.portrait-report .report-title strong,
+.portrait-report .report-title div,
+#printContent .report-title h1,
+#printContent .report-title h2,
+#printContent .report-title strong,
+#printContent .report-title div{
+  position:relative!important;
+  z-index:5!important;
+  color:#fff!important;
+  text-shadow:none!important;
+}
+
+/* Subtítulo más limpio */
+.portrait-report .report-title small,
+.portrait-report .report-title p,
+#printContent .report-title small,
+#printContent .report-title p{
+  color:#fff!important;
+  position:relative!important;
+  z-index:5!important;
+  text-shadow:none!important;
+}
+
+/* Logo: fondo claro y sin elementos encima */
+.portrait-report .report-logo,
+#printContent .report-logo{
+  position:relative!important;
+  z-index:4!important;
+  background:#f7fafc!important;
+}
+
+/* Tabla Código/Versión/Fecha/Formulario limpia */
+.portrait-report .report-meta,
+#printContent .report-meta{
+  position:relative!important;
+  z-index:4!important;
+  background:#fff!important;
+}
+
+/* Mismo aspecto en PDF */
+@media print{
+  #printContent .report-title{
+    background:#073f6f!important;
+    color:#fff!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+  #printContent .report-title{
+    border-bottom-color:#ff6f00!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.15 - ENCABEZADO DEL INFORME CON ESTILO DEL INICIO
+   ========================================================= */
+
+/* Contenedor general */
+.portrait-report .report-head,
+#printContent .report-head{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:30mm minmax(0,1fr) 43mm!important;
+  align-items:stretch!important;
+  overflow:hidden!important;
+  background:#f4f8fb!important;
+  border:0.25mm solid #b9cad8!important;
+}
+
+/* Logo sobre fondo claro */
+.portrait-report .report-logo,
+#printContent .report-logo{
+  position:relative!important;
+  z-index:3!important;
+  background:#f4f8fb!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:2mm!important;
+}
+.portrait-report .report-logo img,
+#printContent .report-logo img{
+  max-width:22mm!important;
+  max-height:22mm!important;
+  width:auto!important;
+  height:auto!important;
+  object-fit:contain!important;
+}
+
+/* Banda azul central con borde diagonal izquierdo, como el inicio */
+.portrait-report .report-title,
+#printContent .report-title{
+  position:relative!important;
+  z-index:2!important;
+  background:#104878!important;
+  color:#fff!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  padding:2.6mm 4mm 3.7mm 8mm!important;
+  border:0!important;
+  clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)!important;
+  -webkit-clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)!important;
+}
+
+/* Sin diagonales internas cruzando el texto */
+.portrait-report .report-title::before,
+.portrait-report .report-title::after,
+#printContent .report-title::before,
+#printContent .report-title::after{
+  content:none!important;
+  display:none!important;
+}
+
+/* Título blanco y limpio */
+.portrait-report .report-title h1,
+.portrait-report .report-title h2,
+.portrait-report .report-title strong,
+#printContent .report-title h1,
+#printContent .report-title h2,
+#printContent .report-title strong{
+  color:#fff!important;
+  text-shadow:none!important;
+  line-height:1.05!important;
+  margin:0!important;
+  position:relative!important;
+  z-index:5!important;
+}
+
+/* Subtítulo / razón social */
+.portrait-report .report-title p,
+.portrait-report .report-title small,
+.portrait-report .report-title div,
+#printContent .report-title p,
+#printContent .report-title small,
+#printContent .report-title div{
+  color:#fff!important;
+  text-shadow:none!important;
+  position:relative!important;
+  z-index:5!important;
+}
+
+/* Línea naranja debajo del contenido central, igual al encabezado de Inicio */
+.portrait-report .report-title{
+  box-shadow:inset 0 -1.15mm 0 #ff6f00!important;
+}
+#printContent .report-title{
+  box-shadow:inset 0 -1.15mm 0 #ff6f00!important;
+}
+
+/* Metadatos a la derecha conservan fondo blanco y lectura limpia */
+.portrait-report .report-meta,
+#printContent .report-meta{
+  position:relative!important;
+  z-index:4!important;
+  background:#fff!important;
+  align-self:stretch!important;
+}
+
+/* Neutralizar adornos anteriores del encabezado completo */
+.portrait-report .report-head::before,
+.portrait-report .report-head::after,
+#printContent .report-head::before,
+#printContent .report-head::after{
+  content:none!important;
+  display:none!important;
+}
+
+@media print{
+  #printContent .report-head{
+    background:#f4f8fb!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+  #printContent .report-title{
+    background:#104878!important;
+    color:#fff!important;
+    box-shadow:inset 0 -1.15mm 0 #ff6f00!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.16 - ENCABEZADO FINAL LIMPIO, ESTILO PANTALLA INICIO
+   ========================================================= */
+
+/* Eliminar por completo las franjas/diagonales antiguas */
+.portrait-report .report-head .stripe,
+#printContent .report-head .stripe,
+.portrait-report .stripe,
+#printContent .stripe{
+  display:none!important;
+  visibility:hidden!important;
+  width:0!important;
+  height:0!important;
+  opacity:0!important;
+}
+
+/* Cabecera en tres zonas */
+.portrait-report .report-head,
+#printContent .report-head{
+  display:grid!important;
+  grid-template-columns:31mm minmax(0,1fr) 43mm!important;
+  align-items:stretch!important;
+  position:relative!important;
+  overflow:hidden!important;
+  background:#f4f8fb!important;
+  border:.25mm solid #b8c9d8!important;
+}
+
+/* Logo */
+.portrait-report .report-logo,
+#printContent .report-logo{
+  grid-column:1!important;
+  background:#f4f8fb!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:1.6mm!important;
+  z-index:4!important;
+}
+.portrait-report .report-logo img,
+#printContent .report-logo img{
+  width:auto!important;
+  height:auto!important;
+  max-width:23mm!important;
+  max-height:22mm!important;
+  object-fit:contain!important;
+}
+
+/* Banda central: azul limpio como Inicio */
+.portrait-report .report-title,
+#printContent .report-title{
+  grid-column:2!important;
+  position:relative!important;
+  background:#104878!important;
+  color:#fff!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  padding:2.4mm 4mm 3.7mm 7mm!important;
+  margin:0!important;
+  border:0!important;
+  box-shadow:inset 0 -1.1mm 0 #ff6f00!important;
+  clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)!important;
+  -webkit-clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)!important;
+  overflow:hidden!important;
+  z-index:3!important;
+}
+
+/* Nada puede dibujarse encima del texto */
+.portrait-report .report-title::before,
+.portrait-report .report-title::after,
+#printContent .report-title::before,
+#printContent .report-title::after,
+.portrait-report .report-head::before,
+.portrait-report .report-head::after,
+#printContent .report-head::before,
+#printContent .report-head::after{
+  content:none!important;
+  display:none!important;
+}
+
+/* Texto del título */
+.portrait-report .report-title *,
+#printContent .report-title *{
+  position:relative!important;
+  z-index:10!important;
+  color:#fff!important;
+  text-shadow:none!important;
+  background:transparent!important;
+}
+.portrait-report .report-title h1,
+.portrait-report .report-title h2,
+.portrait-report .report-title strong,
+#printContent .report-title h1,
+#printContent .report-title h2,
+#printContent .report-title strong{
+  margin:0!important;
+  line-height:1.02!important;
+}
+
+/* Datos técnicos a la derecha */
+.portrait-report .report-meta,
+#printContent .report-meta{
+  grid-column:3!important;
+  position:relative!important;
+  z-index:5!important;
+  background:#fff!important;
+  align-self:stretch!important;
+}
+
+/* Mantener colores idénticos en impresión */
+@media print{
+  #printContent .report-head{
+    background:#f4f8fb!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+  #printContent .report-title{
+    background:#104878!important;
+    color:#fff!important;
+    box-shadow:inset 0 -1.1mm 0 #ff6f00!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.17 - ENCABEZADO RECONSTRUIDO SOBRE EL HTML REAL
+   Se eliminaron desde app.js los elementos .band b1-b4.
+   ========================================================= */
+
+.report-header{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:31mm minmax(0,1fr) 43mm!important;
+  align-items:stretch!important;
+  overflow:hidden!important;
+  background:#f4f8fb!important;
+  border:.25mm solid #b8c9d8!important;
+}
+
+/* Seguridad: ninguna banda antigua puede aparecer */
+.report-header .band,
+.report-header [class*="band"]{
+  display:none!important;
+}
+
+/* Logo */
+.report-header .brand-logo{
+  position:relative!important;
+  z-index:3!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:#f4f8fb!important;
+  padding:1.5mm!important;
+}
+.report-header .brand-logo img{
+  max-width:23mm!important;
+  max-height:22mm!important;
+  width:auto!important;
+  height:auto!important;
+  object-fit:contain!important;
+}
+
+/* Título corporativo, limpio */
+.report-header .brand-title{
+  position:relative!important;
+  z-index:2!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  background:#104878!important;
+  color:#fff!important;
+  padding:2.5mm 4mm 3.8mm 7mm!important;
+  margin:0!important;
+  border:0!important;
+  box-shadow:inset 0 -1.15mm 0 #ff6f00!important;
+  clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)!important;
+  -webkit-clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)!important;
+  overflow:hidden!important;
+}
+.report-header .brand-title::before,
+.report-header .brand-title::after{
+  content:none!important;
+  display:none!important;
+}
+.report-header .brand-title *{
+  position:relative!important;
+  z-index:10!important;
+  color:#fff!important;
+  background:transparent!important;
+  text-shadow:none!important;
+}
+
+/* Metadatos */
+.report-header .meta{
+  position:relative!important;
+  z-index:4!important;
+  background:#fff!important;
+}
+
+/* Misma apariencia en PDF */
+@media print{
+  #printContent .report-header{
+    background:#f4f8fb!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+  #printContent .report-header .brand-title{
+    background:#104878!important;
+    color:#fff!important;
+    box-shadow:inset 0 -1.15mm 0 #ff6f00!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+}
+
+
+/* =========================================================
+   V1.6.18 - ENCABEZADO REAL DE VISTA PREVIA / PDF
+   Selector real: .modern-head / .mh-logo / .mh-title / .mh-meta
+   ========================================================= */
+
+.modern-head{
+  display:grid!important;
+  grid-template-columns:29% 51% 20%!important;
+  min-height:25mm!important;
+  border:1px solid #b9c5d0!important;
+  overflow:hidden!important;
+  background:#f7fafc!important;
+}
+
+/* Logo */
+.modern-head .mh-logo{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:2mm 4mm!important;
+  background:#f7fafc!important;
+}
+.modern-head .mh-logo img{
+  width:100%!important;
+  height:20mm!important;
+  max-width:27mm!important;
+  object-fit:contain!important;
+}
+
+/* Banda central igual al estilo del Inicio:
+   azul continuo, entrada diagonal solo en el borde izquierdo,
+   texto totalmente despejado y línea naranja inferior. */
+.modern-head .mh-title{
+  position:relative!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+
+  background:#104878!important;
+  background-image:none!important;
+  color:#ffffff!important;
+
+  padding:2.5mm 3.5mm 3.8mm 8mm!important;
+  margin:0!important;
+  border:0!important;
+
+  clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)!important;
+  -webkit-clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)!important;
+
+  box-shadow:inset 0 -1.15mm 0 #ff7417!important;
+  overflow:hidden!important;
+  font-size:10.2pt!important;
+  line-height:1.05!important;
+}
+
+/* No permitir decoraciones encima del texto */
+.modern-head .mh-title::before,
+.modern-head .mh-title::after{
+  content:none!important;
+  display:none!important;
+}
+
+.modern-head .mh-title b{
+  color:#ffffff!important;
+  background:transparent!important;
+  text-shadow:none!important;
+  position:relative!important;
+  z-index:5!important;
+}
+
+.modern-head .mh-title span{
+  color:#ffffff!important;
+  background:transparent!important;
+  text-shadow:none!important;
+  position:relative!important;
+  z-index:5!important;
+  font-size:6.6pt!important;
+  margin-top:2px!important;
+  font-weight:600!important;
+}
+
+/* Metadatos */
+.modern-head .mh-meta{
+  background:#ffffff!important;
+  position:relative!important;
+  z-index:5!important;
+}
+
+/* Forzar exactamente el mismo encabezado al imprimir / guardar PDF */
+@media print{
+  .modern-head{
+    background:#f7fafc!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+
+  .modern-head .mh-title{
+    background:#104878!important;
+    background-image:none!important;
+    color:#ffffff!important;
+    box-shadow:inset 0 -1.15mm 0 #ff7417!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+
+  .modern-head .mh-title b,
+  .modern-head .mh-title span{
+    color:#ffffff!important;
+  }
+}
+
+
+/* V1.6.19 - Número de formulario en rojo */
+.modern-head .mh-meta .form-number,
+#printContent .modern-head .mh-meta .form-number{
+  color:#d71920!important;
+  font-weight:700!important;
+}
+
+@media print{
+  #printContent .modern-head .mh-meta .form-number{
+    color:#d71920!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+}

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#123c7a">
+  <title>NODO Mantenimiento V1.6.20</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css?v=1.6.20">
+</head>
+<body>
+<header class="topbar">
+  <img src="logo.jpeg" alt="NODO" class="logo">
+  <div><strong>NODO INGENIERÍA ELÉCTRICA S.A.S.</strong><small>Informes de mantenimiento · Offline · V1.6.20</small></div>
+  <button id="btnHome" class="ghost">Inicio</button>
+</header>
+
+<main>
+<section id="home" class="view active">
+  <div class="corp-hero">
+    <div class="corp-logo"><img src="logo.jpeg" alt="NODO"></div>
+    <div class="corp-title"><h1>NODO INGENIERÍA ELÉCTRICA S.A.S.</h1><p>CONTROL DE INFORMES DE MANTENIMIENTO</p></div>
+  </div>
+  <div class="corp-section-head"><span>1</span><strong>INFORMACIÓN DEL CONTROL</strong><small>Gestión de informes de mantenimiento</small></div>
+  <div class="corp-panel">
+    <div class="corp-fields">
+      <label><span>👥 CLIENTE</span><input id="hCliente"></label>
+      <label><span>👤 QUIEN RECIBE LA ACTIVIDAD</span><input id="hRecibe"></label>
+      <label><span>💼 CARGO</span><input id="hCargoRecibe"></label>
+      <label><span>⚙ QUIEN EJECUTA LA ACTIVIDAD</span><input id="hEjecuta"></label>
+      <label><span>💼 CARGO</span><input id="hCargoEjecuta"></label>
+      <label><span>📅 FECHA</span><input id="hFecha" type="date"></label>
+      <label><span>📄 EDITAR CONSECUTIVO</span><input id="hConsecutivo" type="number" min="1" max="9999"></label>
+      <label><span>⏭ PRÓXIMO CONSECUTIVO</span><input id="hProximo" readonly></label>
+    </div>
+    <div class="corp-side">
+      <img src="logo_inicio.jpeg" alt="NODO" class="corp-side-logo">
+      <button id="btnHistorial" class="corp-side-btn">📁 Historial</button>
+      <button id="btnBackup" class="corp-side-btn">⬇ Exportar respaldo</button>
+      <label class="corp-side-btn import">⬆ Importar respaldo<input id="fileBackup" type="file" accept="application/json" hidden></label>
+    </div>
+  </div>
+  <button id="btnNuevo" class="corp-create"><span>＋</span> CREAR NUEVO INFORME</button>
+  <p class="note">Los informes se guardan localmente en este dispositivo. V1.4 offline.</p>
+</section>
+
+<section id="editor" class="view">
+  <div class="report-head card">
+    <div><strong>NODO INGENIERÍA ELÉCTRICA S.A.S.</strong><h2>FORMATO TÉCNICO INSPECCIÓN Y MANTENIMIENTO DE EQUIPOS</h2></div>
+    <div class="meta"><span>Código <b>FT-MP-TE-001</b></span><span>Versión <b>01</b></span><span>FORMULARIO No. <b id="formNo">0001</b></span></div>
+  </div>
+
+  <form id="reportForm">
+    <div class="section-title numbered"><span>1</span> INFORMACIÓN GENERAL DEL SERVICIO</div>
+    <div class="card grid2">
+      <label>Cliente<input id="cliente" required></label>
+      <label>Ubicación del equipo<input id="ubicacion"></label>
+      <label>Descripción del equipo<input id="descripcion"></label>
+      <label>Fecha<input id="fecha" type="date" required></label>
+      <label>Hora inicio<input id="horaInicio" type="time"></label>
+      <label>Hora final<input id="horaFinal" type="time"></label>
+    </div>
+
+    <div class="section-title numbered"><span>2</span> INSPECCIÓN Y MANTENIMIENTO</div>
+    <div id="checklist" class="checklist"></div>
+
+    <div class="section-title numbered"><span>3</span> MEDICIONES ELÉCTRICAS Y TÉRMICAS</div>
+    <div class="card measurements">
+      <fieldset><legend>Tensión de línea</legend><label>L1-L2 (V)<input data-measure="l12" inputmode="decimal"></label><label>L1-L3 (V)<input data-measure="l13" inputmode="decimal"></label><label>L2-L3 (V)<input data-measure="l23" inputmode="decimal"></label></fieldset>
+      <fieldset><legend>Tensión de fase</legend><label>L1-N (V)<input data-measure="l1n" inputmode="decimal"></label><label>L2-N (V)<input data-measure="l2n" inputmode="decimal"></label><label>L3-N (V)<input data-measure="l3n" inputmode="decimal"></label></fieldset>
+      <fieldset><legend>Corriente</legend><label>L1 (A)<input data-measure="a1" inputmode="decimal"></label><label>L2 (A)<input data-measure="a2" inputmode="decimal"></label><label>L3 (A)<input data-measure="a3" inputmode="decimal"></label></fieldset>
+      <fieldset><legend>Temperatura</legend><label>L1 (°C)<input data-measure="t1" inputmode="decimal"></label><label>L2 (°C)<input data-measure="t2" inputmode="decimal"></label><label>L3 (°C)<input data-measure="t3" inputmode="decimal"></label></fieldset>
+    </div>
+
+    <div class="section-title numbered"><span>4</span> HALLAZGOS, ANOMALÍAS Y RECOMENDACIONES</div>
+    <div class="card grid2">
+      <label>Hallazgos / Anomalías identificadas<textarea id="hallazgos" rows="6"></textarea></label>
+      <label>Recomendaciones técnicas<textarea id="recomendaciones" rows="6"></textarea></label>
+    </div>
+
+    <div class="section-title numbered"><span>5</span> REGISTRO FOTOGRÁFICO</div>
+    <div class="card photo-grid">
+      <div class="photo-card">
+        <h3>Fotografía 1</h3>
+        <div class="photo-frame"><img id="photo1Preview" alt="Fotografía 1"><span>Sin fotografía</span></div>
+        <label class="photo-button">📷 Tomar / seleccionar foto<input id="photo1Input" type="file" accept="image/*" capture="environment" hidden></label>
+        <button type="button" data-remove-photo="1">Eliminar foto</button>
+      </div>
+      <div class="photo-card">
+        <h3>Fotografía 2</h3>
+        <div class="photo-frame"><img id="photo2Preview" alt="Fotografía 2"><span>Sin fotografía</span></div>
+        <label class="photo-button">📷 Tomar / seleccionar foto<input id="photo2Input" type="file" accept="image/*" capture="environment" hidden></label>
+        <button type="button" data-remove-photo="2">Eliminar foto</button>
+      </div>
+    </div>
+
+    <div class="section-title numbered"><span>6</span> CIERRE Y FIRMAS</div>
+    <div class="card signatures">
+      <div>
+        <h3>Ejecutado por</h3>
+        <label>Nombre<input id="ejecuta"></label><label>Cargo<input id="cargoEjecuta"></label>
+        <canvas id="sigEjecuta" class="sig" width="800" height="260"></canvas>
+        <button type="button" data-clear="sigEjecuta">Limpiar firma</button>
+      </div>
+      <div>
+        <h3>Recibido por</h3>
+        <label>Nombre<input id="recibe"></label><label>Cargo<input id="cargoRecibe"></label>
+        <canvas id="sigRecibe" class="sig" width="800" height="260"></canvas>
+        <button type="button" data-clear="sigRecibe">Limpiar firma</button>
+      </div>
+    </div>
+  </form>
+
+  <div class="sticky-actions">
+    <button id="btnGuardar" class="primary">Guardar borrador</button>
+    <button id="btnPDF">Vista previa</button>
+    <button id="btnCerrar">Volver</button>
+  </div>
+</section>
+
+<section id="history" class="view">
+  <div class="hero"><h1>Historial de informes</h1><p>Guardados en este dispositivo.</p></div>
+  <div id="historyList"></div>
+  <div class="actions"><button id="btnHistoryBack">Volver</button></div>
+</section>
+
+<section id="printView" class="view print-report">
+  <div id="previewActions" class="preview-actions">
+    <button id="btnPrintPDF" class="primary">Generar / Guardar PDF</button>
+    <button id="btnBackEditor">Volver al informe</button>
+  </div>
+  <div id="printContent"></div>
+</section>
+</main>
+
+<div id="toast"></div>
+<script src="app.js?v=1.6.20"></script>
+</body>
+</html>
