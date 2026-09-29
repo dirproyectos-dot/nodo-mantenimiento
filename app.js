@@ -76,8 +76,8 @@ function waitPreviewImages(){
     img.addEventListener("error",resolve,{once:true});
   })));
 }
-function buildPreview(){
- const r=collect(); if(!r){alert("No hay un informe activo.");return} saveCurrent();
+function buildPreview(reportOverride=null){
+ const r=reportOverride||collect(); if(!r){alert("No hay un informe activo.");return} if(!reportOverride) saveCurrent();
  const checks=(r.checks||[]).filter(Boolean); let last="",rows="";
  const group=x=>{const n=parseInt(String(x).split(".")[0],10);return n===1?"LIMPIEZA":n===2?"ASPECTOS MECÁNICOS":"ASPECTOS ELÉCTRICOS"};
  checks.forEach(x=>{const g=group(x.item);if(g!==last){rows+=`<tr class="check-group"><td colspan="4">${g}</td></tr>`;last=g}rows+=`<tr><td class="c-item">${esc(x.item)}</td><td class="c-act">${esc(x.text)}</td><td class="c-state">${esc(x.done)}</td><td class="c-obs">${esc(x.obs)}</td></tr>`});
@@ -106,6 +106,48 @@ function buildPreview(){
  <section class="rbox portrait-signatures"><h2><i>6</i> CIERRE Y FIRMAS</h2><div class="modern-signatures two-signatures"><div><b>Técnico NODO / Ejecutado por</b><span>Nombre: ${esc(r.ejecuta)}</span><span>Cargo: ${esc(r.cargoEjecuta)}</span><img src="${safeSignature(r.sigEjecuta)}"></div><div><b>Representante del cliente / Recibido por</b><span>Nombre: ${esc(r.recibe)}</span><span>Cargo: ${esc(r.cargoRecibe)}</span><img src="${safeSignature(r.sigRecibe)}"></div></div></section>
  <div class="report-footer">Documento propiedad de NODO Ingeniería Eléctrica S.A.S. · FT-MP-TE-001 · Versión 01 · Formulario ${pad(r.number)}</div></div>`; show("printView");
 }
+async function exportHistoryPDF(){
+  const all=reports().sort((a,b)=>a.number-b.number);
+  if(!all.length){alert("No hay informes guardados para exportar.");return}
+
+  const originalCurrent=current;
+  const originalHTML=$("#printContent").innerHTML;
+  const pages=[];
+
+  for(const r of all){
+    buildPreview(r);
+    pages.push($("#printContent").innerHTML);
+  }
+
+  $("#printContent").innerHTML=`<div class="history-pdf-batch">${pages.join("")}</div>`;
+  show("printView");
+  await waitPreviewImages();
+
+  const oldTitle=document.title;
+  const d=new Date();
+  const dateName=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  document.title=`Historial_NODO_${dateName}`;
+
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{
+      document.title=oldTitle;
+      current=originalCurrent;
+    },1500);
+  },300);
+}
+
+function clearHistory(){
+  const all=reports();
+  if(!all.length){alert("El historial ya está vacío.");return}
+  if(confirm(`¿Está seguro de eliminar todo el historial (${all.length} informe${all.length===1?"":"s"})?\n\nEsta acción no se puede deshacer.`)){
+    saveReports([]);
+    current=null;
+    renderHistory();
+    toast("Historial eliminado.");
+  }
+}
+
 async function printPDF(){
   if(!$("#printContent").innerHTML.trim()){alert("Primero genere la vista previa.");return}
   await waitPreviewImages();
@@ -131,7 +173,7 @@ $("#historyList").addEventListener("click",e=>{
   const del=e.target.closest(".delete-report");
   if(del){deleteReport(del.dataset.id);return}
 });
-$("#btnNuevo").onclick=newReport;$("#btnGuardar").onclick=saveCurrent;$("#btnPDF").onclick=buildPreview;$("#btnCerrar").onclick=()=>{saveCurrent();show("home")};$("#btnHistorial").onclick=()=>{renderHistory();show("history")};$("#btnHistoryBack").onclick=()=>show("home");$("#btnHome").onclick=()=>show("home");$("#btnBackup").onclick=backup;
+$("#btnNuevo").onclick=newReport;$("#btnGuardar").onclick=saveCurrent;$("#btnPDF").onclick=buildPreview;$("#btnCerrar").onclick=()=>{saveCurrent();show("home")};$("#btnHistorial").onclick=()=>{renderHistory();show("history")};$("#btnHistoryBack").onclick=()=>show("home");$("#btnExportHistoryPDF").onclick=exportHistoryPDF;$("#btnClearHistory").onclick=clearHistory;$("#btnHome").onclick=()=>show("home");$("#btnBackup").onclick=backup;
 $("#photo1Input").onchange=e=>{handlePhoto(1,e.target.files[0]);e.target.value=""};
 $("#photo2Input").onchange=e=>{handlePhoto(2,e.target.files[0]);e.target.value=""};
 $$("[data-remove-photo]").forEach(b=>b.onclick=()=>{

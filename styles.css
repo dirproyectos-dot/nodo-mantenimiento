@@ -45,7 +45,7 @@ button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}button
 #printContent tr{break-inside:avoid;page-break-inside:avoid}
 
 
-/* V1.4 corporate interface */
+/* V1.1 corporate interface */
 .corp-hero{display:grid;grid-template-columns:260px 1fr;align-items:center;min-height:125px;background:linear-gradient(120deg,#f8fbff 0 28%,#0b3d6e 28% 100%);border-radius:12px;overflow:hidden;border:1px solid #cbd5e1;margin:8px 0 14px}
 .corp-logo{padding:16px 25px}.corp-logo img{max-width:210px;max-height:90px;object-fit:contain}
 .corp-title{text-align:center;color:#fff;padding:18px}.corp-title h1{font-size:29px;margin:0 0 8px;letter-spacing:.5px}.corp-title p{font-size:21px;margin:0;letter-spacing:1px;border-bottom:4px solid #ff7518;padding-bottom:8px}
@@ -2188,5 +2188,37 @@ label.corp-side-btn.import #fileBackup{
     color:#d71920!important;
     -webkit-print-color-adjust:exact!important;
     print-color-adjust:exact!important;
+  }
+}
+
+
+/* V1.6.22 - Herramientas del historial */
+.history-tools{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:0 0 18px;
+}
+.history-tools button{
+  min-height:46px;
+  padding:10px 18px;
+  font-weight:700;
+}
+button.danger{
+  background:#b42318;
+  color:#fff;
+  border-color:#b42318;
+}
+button.danger:hover{filter:brightness(.95)}
+
+/* Cada informe del PDF consolidado inicia en una página nueva */
+@media print{
+  .history-pdf-batch > .print-sheet{
+    break-after:page;
+    page-break-after:always;
+  }
+  .history-pdf-batch > .print-sheet:last-child{
+    break-after:auto;
+    page-break-after:auto;
   }
 }

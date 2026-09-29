@@ -1,4 +1,4 @@
-NODO Mantenimiento PWA V1.6.16
+NODO Mantenimiento PWA V1.1
 
 ENCABEZADO DEL INFORME
 - Se eliminan completamente las franjas diagonales antiguas (.stripe).
