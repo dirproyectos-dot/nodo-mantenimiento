@@ -2222,3 +2222,13 @@ button.danger:hover{filter:brightness(.95)}
     page-break-after:auto;
   }
 }
+
+/* Fecha de creación del formato y alineación de mediciones - V1.1 */
+#printContent .measure-card td,
+#printContent .measure-card td:first-child,
+#printContent .measure-card td:last-child {text-align:center!important;vertical-align:middle!important;}
+@media print {
+ #printContent .measure-card td,
+ #printContent .measure-card td:first-child,
+ #printContent .measure-card td:last-child {text-align:center!important;vertical-align:middle!important;}
+}
