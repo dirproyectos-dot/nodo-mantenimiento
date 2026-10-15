@@ -173,7 +173,7 @@ $("#historyList").addEventListener("click",e=>{
   const del=e.target.closest(".delete-report");
   if(del){deleteReport(del.dataset.id);return}
 });
-$("#btnNuevo").onclick=newReport;$("#btnGuardar").onclick=saveCurrent;$("#btnPDF").onclick=buildPreview;$("#btnCerrar").onclick=()=>{saveCurrent();show("home")};$("#btnHistorial").onclick=()=>{renderHistory();show("history")};$("#btnHistoryBack").onclick=()=>show("home");$("#btnExportHistoryPDF").onclick=exportHistoryPDF;$("#btnClearHistory").onclick=clearHistory;$("#btnHome").onclick=()=>show("home");$("#btnBackup").onclick=backup;
+$("#btnNuevo").onclick=newReport;$("#btnGuardar").onclick=saveCurrent;$("#btnPDF").onclick=()=>buildPreview();$("#btnCerrar").onclick=()=>{saveCurrent();show("home")};$("#btnHistorial").onclick=()=>{renderHistory();show("history")};$("#btnHistoryBack").onclick=()=>show("home");$("#btnExportHistoryPDF").onclick=exportHistoryPDF;$("#btnClearHistory").onclick=clearHistory;$("#btnHome").onclick=()=>show("home");$("#btnBackup").onclick=backup;
 $("#photo1Input").onchange=e=>{handlePhoto(1,e.target.files[0]);e.target.value=""};
 $("#photo2Input").onchange=e=>{handlePhoto(2,e.target.files[0]);e.target.value=""};
 $$("[data-remove-photo]").forEach(b=>b.onclick=()=>{
