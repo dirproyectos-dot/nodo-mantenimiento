@@ -2232,3 +2232,9 @@ button.danger:hover{filter:brightness(.95)}
  #printContent .measure-card td:first-child,
  #printContent .measure-card td:last-child {text-align:center!important;vertical-align:middle!important;}
 }
+
+/* Opciones independientes de cámara y galería */
+.photo-choice-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:8px}
+.photo-choice-actions .photo-button{display:flex;align-items:center;justify-content:center;margin:0;min-height:48px;padding:9px 8px;font-weight:700}
+.photo-choice-actions .photo-gallery-button{background:#eef5fc;color:#0b3d6e;border:1px solid #9bb9d6}
+@media(max-width:720px){.photo-choice-actions{grid-template-columns:1fr}}

@@ -175,7 +175,9 @@ $("#historyList").addEventListener("click",e=>{
 });
 $("#btnNuevo").onclick=newReport;$("#btnGuardar").onclick=saveCurrent;$("#btnPDF").onclick=()=>buildPreview();$("#btnCerrar").onclick=()=>{saveCurrent();show("home")};$("#btnHistorial").onclick=()=>{renderHistory();show("history")};$("#btnHistoryBack").onclick=()=>show("home");$("#btnExportHistoryPDF").onclick=exportHistoryPDF;$("#btnClearHistory").onclick=clearHistory;$("#btnHome").onclick=()=>show("home");$("#btnBackup").onclick=backup;
 $("#photo1Input").onchange=e=>{handlePhoto(1,e.target.files[0]);e.target.value=""};
+$("#photo1GalleryInput").onchange=e=>{if(e.target.files[0])handlePhoto(1,e.target.files[0]);e.target.value=""};
 $("#photo2Input").onchange=e=>{handlePhoto(2,e.target.files[0]);e.target.value=""};
+$("#photo2GalleryInput").onchange=e=>{if(e.target.files[0])handlePhoto(2,e.target.files[0]);e.target.value=""};
 $$("[data-remove-photo]").forEach(b=>b.onclick=()=>{
   const n=b.dataset.removePhoto;if(current)current["photo"+n]="";setPhotoPreview(n,"");
 });
