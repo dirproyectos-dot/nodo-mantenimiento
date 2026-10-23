@@ -220,7 +220,7 @@ async function printPDF(){
     setTimeout(()=>{document.title=oldTitle;},1500);
   },250);
 }
-function backup(){const data={version:1,exported:new Date().toISOString(),settings:settings(),reports:reports()};const b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`NODO_respaldo_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href)}
+function backup(){const data={version:1,exported:new Date().toISOString(),settings:settings(),reports:reports()};const b=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`NODO_respaldo_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),60000);toast("Respaldo generado. Verifica que se guardó en Descargas.")}
 $("#fileBackup").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.reports))throw 0;if(confirm("¿Importar el respaldo? Esto reemplazará los informes locales actuales.")){saveReports(d.reports);if(d.settings)saveSettings(d.settings);initHome();toast("Respaldo importado")}}catch{alert("El archivo de respaldo no es válido.")}e.target.value=""};
 $("#historyList").addEventListener("click",e=>{
   const open=e.target.closest(".open-report");
