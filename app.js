@@ -15,9 +15,9 @@ function buildChecklist(){const c=$("#checklist");c.innerHTML=ITEMS.map((x,i)=>x
 function initHome(){const s=settings();$("#hCliente").value=s.cliente;$("#hRecibe").value=s.recibe;$("#hCargoRecibe").value=s.cargoRecibe;$("#hEjecuta").value=s.ejecuta;$("#hCargoEjecuta").value=s.cargoEjecuta;$("#hConsecutivo").value=s.next;$("#hProximo").value=pad(s.next);$("#hFecha").value=new Date().toISOString().slice(0,10)}
 $("#hConsecutivo").oninput=e=>$("#hProximo").value=pad(Math.max(1,+e.target.value||1));
 function persistHome(){let s=settings();Object.assign(s,{cliente:$("#hCliente").value,recibe:$("#hRecibe").value,cargoRecibe:$("#hCargoRecibe").value,ejecuta:$("#hEjecuta").value,cargoEjecuta:$("#hCargoEjecuta").value,next:Math.max(1,+$("#hConsecutivo").value||1)});saveSettings(s);return s}
-function clearCanvas(c){const x=c.getContext("2d");x.clearRect(0,0,c.width,c.height);x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height)}
+function clearCanvas(c){c.dataset.sigLoad=String((+c.dataset.sigLoad||0)+1);const x=c.getContext("2d");x.clearRect(0,0,c.width,c.height);x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height)}
 function setupSig(c){clearCanvas(c);let on=false,last;const p=e=>{const r=c.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return[(t.clientX-r.left)*c.width/r.width,(t.clientY-r.top)*c.height/r.height]};const down=e=>{on=true;last=p(e);e.preventDefault()},move=e=>{if(!on)return;const q=p(e),x=c.getContext("2d");x.strokeStyle="#000";x.lineWidth=4;x.lineCap="round";x.beginPath();x.moveTo(...last);x.lineTo(...q);x.stroke();last=q;e.preventDefault()},up=()=>on=false;c.addEventListener("pointerdown",down);c.addEventListener("pointermove",move);window.addEventListener("pointerup",up)}
-function canvasData(id){return $("#"+id).toDataURL("image/png")} function putCanvas(id,data){const c=$("#"+id);clearCanvas(c);if(!data)return;let im=new Image();im.onload=()=>c.getContext("2d").drawImage(im,0,0,c.width,c.height);im.src=data}
+function canvasData(id){return $("#"+id).toDataURL("image/png")} function putCanvas(id,data){const c=$("#"+id);clearCanvas(c);if(!data)return;const token=c.dataset.sigLoad;let im=new Image();im.onload=()=>{if(c.dataset.sigLoad===token)c.getContext("2d").drawImage(im,0,0,c.width,c.height)};im.src=data}
 function setPhotoPreview(n,data){
   const img=$("#photo"+n+"Preview"), frame=img.parentElement, placeholder=frame.querySelector("span");
   if(data){img.src=data;img.style.display="block";placeholder.style.display="none"}
@@ -59,6 +59,7 @@ function reportLabel(r){
   return `${place} - ${equipment}`;
 }
 // Un lienzo vacío también produce una imagen PNG válida: comprobar trazos reales.
+// Detectar tinta comparando contra un lienzo vacío; ignorar fondo blanco y transparencia.
 function signatureHasInk(data){
   return new Promise(resolve=>{
     if(!safeSignature(data)){resolve(false);return}
@@ -67,20 +68,22 @@ function signatureHasInk(data){
     img.onload=()=>{
       try{
         const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;
+        if(!c.width||!c.height){resolve(false);return}
         const ctx=c.getContext("2d",{willReadFrequently:true});ctx.drawImage(img,0,0);
-        const pixels=ctx.getImageData(0,0,c.width,c.height).data;
-        let dark=0;
-        for(let i=0;i<pixels.length;i+=4){
-          if(pixels[i+3]>100 && pixels[i]<170 && pixels[i+1]<170 && pixels[i+2]<170){
-            if(++dark>=12){resolve(true);return}
-          }
+        const px=ctx.getImageData(0,0,c.width,c.height).data;
+        let ink=0;
+        // Un trazo negro real requiere píxeles oscuros y opacos; el blanco del lienzo no cuenta.
+        for(let i=0;i<px.length;i+=4){
+          if(px[i+3]>200 && Math.max(px[i],px[i+1],px[i+2])<100)ink++;
         }
-        resolve(false);
+        // Evitar clasificar ruido o un toque aislado como una firma.
+        resolve(ink>=Math.max(60,Math.floor(c.width*c.height*0.0004)));
       }catch(e){resolve(false)}
     };
     img.src=data;
   });
 }
+
 async function updateSignatureStatuses(){
   const cards=[...document.querySelectorAll(".history-item[data-report-id]")];
   const all=reports();
