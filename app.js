@@ -53,11 +53,24 @@ function newReport(){const s=persistHome();current={id:crypto.randomUUID?crypto.
 function collect(){if(!current)return null;current.number=+current.number;["cliente","ubicacion","descripcion","fecha","horaInicio","horaFinal","hallazgos","recomendaciones","ejecuta","cargoEjecuta","recibe","cargoRecibe"].forEach(k=>current[k]=$("#"+k).value);current.checks=ITEMS.map((x,i)=>x[2]?null:{item:x[0],text:x[1],done:document.querySelector(`[data-check="${i}"]`).value,obs:document.querySelector(`[data-obs="${i}"]`).value});current.measures={};$$("[data-measure]").forEach(x=>current.measures[x.dataset.measure]=x.value);current.sigEjecuta=canvasData("sigEjecuta");current.sigRecibe=canvasData("sigRecibe");current.updated=new Date().toISOString();return current}
 function saveCurrent(){const r=collect(),all=reports(),i=all.findIndex(x=>x.id===r.id);if(i>=0)all[i]=r;else all.push(r);saveReports(all);let s=settings();if(r.number>=s.next)s.next=r.number+1;saveSettings(s);initHome();toast("Informe guardado")}
 function loadReport(id){current=reports().find(x=>x.id===id);if(!current)return;$("#formNo").textContent=pad(current.number);["cliente","ubicacion","descripcion","fecha","horaInicio","horaFinal","hallazgos","recomendaciones","ejecuta","cargoEjecuta","recibe","cargoRecibe"].forEach(k=>$("#"+k).value=current[k]||"");(current.checks||[]).forEach((v,j)=>{if(!v)return;const idx=ITEMS.findIndex(x=>x[0]===v.item);if(idx>=0){const c=document.querySelector(`[data-check="${idx}"]`);const o=document.querySelector(`[data-obs="${idx}"]`);if(c)c.value=v.done||"";if(o)o.value=v.obs||""}});$$("[data-measure]").forEach(x=>x.value=(current.measures||{})[x.dataset.measure]||"");putCanvas("sigEjecuta",current.sigEjecuta);putCanvas("sigRecibe",current.sigRecibe);setPhotoPreview(1,current.photo1||"");setPhotoPreview(2,current.photo2||"");show("editor")}
+function reportLabel(r){
+  const place=(r.cliente||"Sin centro comercial").trim();
+  const equipment=(r.descripcion||"Equipo sin descripción").trim();
+  return `${place} - ${equipment}`;
+}
+function reportSigned(r){
+  return !!(safeSignature(r.sigEjecuta)&&safeSignature(r.sigRecibe));
+}
+function pdfSafeName(s){
+  return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9 _-]/g,"").trim().replace(/\s+/g,"_").slice(0,110);
+}
 function renderHistory(){
   const a=reports().sort((x,y)=>y.number-x.number);
   $("#historyList").innerHTML=a.length?a.map(r=>`<div class="card history-item">
     <div class="num">${pad(r.number)}</div>
-    <div><b>${esc(r.cliente||"Sin cliente")}</b><br><small>${esc(r.fecha||"")} · ${esc(r.status||"Borrador")}</small></div>
+    <div><b>${esc(reportLabel(r))}</b><br><small>${esc(r.fecha||"")} · ${esc(r.status||"Borrador")}</small><br>
+    <span class="signature-status ${reportSigned(r)?"signed":"unsigned"}">${reportSigned(r)?"✓ Firmado (2 firmas)":"⚠ Pendiente de firma"}</span></div>
     <div class="hactions">
       <button type="button" class="open-report" data-id="${esc(r.id)}">Abrir</button>
       <button type="button" class="delete-report" data-id="${esc(r.id)}">Eliminar</button>
@@ -158,7 +171,7 @@ async function printPDF(){
     saveReports(all);
   }
   const oldTitle=document.title;
-  const reportNumber=current && current.number!=null ? pad(current.number) : "NODO_Informe";
+  const reportNumber=current && current.number!=null ? `${pad(current.number)}_${pdfSafeName(reportLabel(current))}` : "NODO_Informe";
   document.title=reportNumber;
   setTimeout(()=>{
     window.print();

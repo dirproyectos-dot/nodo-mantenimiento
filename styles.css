@@ -2238,3 +2238,9 @@ button.danger:hover{filter:brightness(.95)}
 .photo-choice-actions .photo-button{display:flex;align-items:center;justify-content:center;margin:0;min-height:48px;padding:9px 8px;font-weight:700}
 .photo-choice-actions .photo-gallery-button{background:#eef5fc;color:#0b3d6e;border:1px solid #9bb9d6}
 @media(max-width:720px){.photo-choice-actions{grid-template-columns:1fr}}
+
+/* Identificación de informes y estado de firmas en historial */
+.signature-status{display:inline-block;margin-top:6px;font-weight:700;font-size:12px;border-radius:5px;padding:4px 8px}
+.signature-status.signed{color:#17603b;background:#e3f5e9}
+.signature-status.unsigned{color:#925400;background:#fff0cc}
+.history-item b{overflow-wrap:anywhere}
