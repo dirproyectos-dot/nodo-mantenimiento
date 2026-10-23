@@ -58,8 +58,45 @@ function reportLabel(r){
   const equipment=(r.descripcion||"Equipo sin descripción").trim();
   return `${place} - ${equipment}`;
 }
-function reportSigned(r){
-  return !!(safeSignature(r.sigEjecuta)&&safeSignature(r.sigRecibe));
+// Un lienzo vacío también produce una imagen PNG válida: comprobar trazos reales.
+function signatureHasInk(data){
+  return new Promise(resolve=>{
+    if(!safeSignature(data)){resolve(false);return}
+    const img=new Image();
+    img.onerror=()=>resolve(false);
+    img.onload=()=>{
+      try{
+        const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;
+        const ctx=c.getContext("2d",{willReadFrequently:true});ctx.drawImage(img,0,0);
+        const pixels=ctx.getImageData(0,0,c.width,c.height).data;
+        let dark=0;
+        for(let i=0;i<pixels.length;i+=4){
+          if(pixels[i+3]>100 && pixels[i]<170 && pixels[i+1]<170 && pixels[i+2]<170){
+            if(++dark>=12){resolve(true);return}
+          }
+        }
+        resolve(false);
+      }catch(e){resolve(false)}
+    };
+    img.src=data;
+  });
+}
+async function updateSignatureStatuses(){
+  const cards=[...document.querySelectorAll(".history-item[data-report-id]")];
+  const all=reports();
+  for(const card of cards){
+    const r=all.find(x=>String(x.id)===card.dataset.reportId);
+    if(!r)continue;
+    const [technician,client]=await Promise.all([signatureHasInk(r.sigEjecuta),signatureHasInk(r.sigRecibe)]);
+    if(!card.isConnected)continue;
+    const el=card.querySelector(".signature-status");
+    if(!el)continue;
+    el.classList.toggle("signed",technician&&client);
+    el.classList.toggle("unsigned",!(technician&&client));
+    el.textContent=technician&&client?"✓ Firmado (2 firmas)":
+      !technician&&!client?"⚠ Sin firmas":
+      !technician?"⚠ Falta firma del técnico":"⚠ Falta firma del cliente";
+  }
 }
 function pdfSafeName(s){
   return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
@@ -67,15 +104,16 @@ function pdfSafeName(s){
 }
 function renderHistory(){
   const a=reports().sort((x,y)=>y.number-x.number);
-  $("#historyList").innerHTML=a.length?a.map(r=>`<div class="card history-item">
+  $("#historyList").innerHTML=a.length?a.map(r=>`<div class="card history-item" data-report-id="${esc(r.id)}">
     <div class="num">${pad(r.number)}</div>
     <div><b>${esc(reportLabel(r))}</b><br><small>${esc(r.fecha||"")} · ${esc(r.status||"Borrador")}</small><br>
-    <span class="signature-status ${reportSigned(r)?"signed":"unsigned"}">${reportSigned(r)?"✓ Firmado (2 firmas)":"⚠ Pendiente de firma"}</span></div>
+    <span class="signature-status unsigned">Verificando firmas…</span></div>
     <div class="hactions">
       <button type="button" class="open-report" data-id="${esc(r.id)}">Abrir</button>
       <button type="button" class="delete-report" data-id="${esc(r.id)}">Eliminar</button>
     </div>
   </div>`).join(""):`<div class="card">Aún no hay informes guardados.</div>`;
+  if(a.length)updateSignatureStatuses();
 }
 function deleteReport(id){if(confirm("¿Eliminar este informe del dispositivo?")){saveReports(reports().filter(x=>x.id!==id));renderHistory()}}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}

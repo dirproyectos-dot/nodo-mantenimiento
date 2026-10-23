@@ -1,4 +1,4 @@
-const CACHE="nodo-mantenimiento-v1-1-history-signatures-20261022";
+const CACHE="nodo-mantenimiento-v1-1-firmas-inkfix";
 const ASSETS=["./","index.html","styles.css?v=1.1.4","app.js?v=1.1.4","manifest.webmanifest","logo.jpeg"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
